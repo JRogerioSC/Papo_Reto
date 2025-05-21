@@ -1,0 +1,21 @@
+.container{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding-top: 100px;
+}
+
+h1{
+  color: rgb(78, 78, 206);
+  font-size: 32pix;
+}
+
+form{
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 30px;
+  border-radius: 10px;
+  background-color: rgb(119, 230, 8);
+}
+
