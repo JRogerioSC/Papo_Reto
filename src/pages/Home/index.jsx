@@ -6,14 +6,18 @@ function Home() {
 
   const users = [{
     id: '0000066677788',
-    name: 'Rogerio',
+    name:'Rogerio',
     menssage: 'blablabla'
   },
   {
     id: '0000066677733',
-    name: 'Mario',
+    name:'Mario',
     menssage: 'blobloblo'
-  }
+  },
+   {id: '0000066677755',
+    name:'Joao',
+    menssage: 'bliblibli'
+   }
   ]
 
 
@@ -21,9 +25,21 @@ function Home() {
 
     <div className='container'>
 
-      <form>
+      <h1>Papo_Reto</h1>
 
-        <h1>Papo_Reto</h1>
+      {users.map((user) => (
+        <div key={user.id}>
+          <div>
+            <p>Nome:</p> {user.name}
+            <p>Menssagem:</p> {user.menssage}
+          </div>
+          <button>
+            <img src={Trash} />
+          </button>
+        </div>
+      ))}
+
+      <form>
 
         <input name="nome" type='text' />
 
@@ -33,19 +49,7 @@ function Home() {
 
       </form>
 
-      {users.map((user) => (
-        <div key={user.id}>
-          <div>
-            <p>Nome: {user.name}</p>
-            <P>Menssagem: {user.menssage}</P>
-          </div>
-          <button>
-            <img src={Trash} />
-          </button>
-        </div>
-      ))}
-
-
+      
     </div>
   )
 }

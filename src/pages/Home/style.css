@@ -7,15 +7,16 @@
 
 h1{
   color: rgb(78, 78, 206);
+  background-color: rgb(243, 246, 247);
+  border-radius: 10px;
   font-size: 32pix;
 }
 
 form{
   display: flex;
-  flex-direction: column;
   gap: 30px;
   padding: 30px;
   border-radius: 10px;
-  background-color: rgb(119, 230, 8);
+  background-color: rgb(57, 82, 33);
 }
 
