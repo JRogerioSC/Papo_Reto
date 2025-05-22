@@ -28,10 +28,10 @@ function Home() {
       <h1>Papo_Reto</h1>
 
       {users.map((user) => (
-        <div key={user.id}>
+        <div key={user.id}className='card'>
           <div>
-            <p>Nome:</p> {user.name}
-            <p>Menssagem:</p> {user.menssage}
+            <p>Nome: <span>{user.name}</span></p>
+            <p>Menssagem: <span>{user.menssage}</span></p>
           </div>
           <button>
             <img src={Trash} />
@@ -41,9 +41,9 @@ function Home() {
 
       <form>
 
-        <input name="nome" type='text' />
+        <input placeholder='Nome' className='nome' name="nome" type='text' />
 
-        <input name="menssagem" type='text' />
+        <input placeholder='Menssagem' className='menssage' name="menssagem" type='text' />
 
         <button type='button'>ENVIAR</button>
 
