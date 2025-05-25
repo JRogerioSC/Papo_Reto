@@ -8,24 +8,68 @@
 body {
   min-height: 100vh;
   width: 100vw;
-  background: linear-gradient(rgb(192, 190, 199));
+  background: rgb(13, 13, 14);
 }
 
-@media(max-width: 800px) {
+@media(max-width:750px) {
 
 
   body {
-    max-width: 800px;
-    height: auto;
+    min-height: 50vh;
+    width: 84vw;
+    background: rgb(13, 13, 14);
   }
 
   form {
-    max-width: 800px;
-    height: auto;
+    display: flex;
+    gap: 5px;
+    padding: -7 vmin;
+    border-radius: 10px;
+    background-color: transparent;
+    max-width: 100%;
+    width: 309px;
+    margin-bottom: 40px;
+  }
+
+  .card {
+    display: flex;
+    justify-content: space-between;
+    background-color: aliceblue;
+    margin: 9px;
+    padding: 9px;
+    width: 250px;
+    border-radius: 10px;
+
   }
 
   .enviar {
-    max-width: 800px;
-    height: auto;
+    border-radius: 30px;
+    background-color: rgb(96, 134, 168);
+    color: rgb(235, 242, 248);
+    height: 30px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
   }
+
+  .menssage {
+    display: flex;
+    border: 1px solid #48456c;
+    border-radius: 2px;
+    height: 50px;
+    background-color: #dcdce9;
+    outline: none;
+    margin: 2px;
+    padding: 9px;
+    width: 135px;
+  }
+
+  .nome {
+  border: 1px solid #48456c;
+  border-radius: 30px;
+  height: 30px;
+  width: 160px;
+  background-color: #dcdce9;
+  outline: none;
+}
 }

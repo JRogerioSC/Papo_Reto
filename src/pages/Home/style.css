@@ -16,12 +16,17 @@ h1 {
 form {
   display: flex;
   gap: 30px;
-  padding: 30px;
+  padding: -7 vmin;
   border-radius: 10px;
-  background-color: rgb(78, 14, 199);
+  background-color: transparent;
   max-width: 50%;
   width: 400px;
   margin-bottom: 20px;
+
+  input{
+    display: flex;
+    padding: 2%;
+  }
 
   
 
@@ -29,8 +34,8 @@ form {
 
 .enviar{
     border-radius: 30px;
-    background-color: rgb(2, 49, 10);
-    color: aliceblue;
+    background-color: rgb(96, 134, 168);
+    color: rgb(235, 242, 248);
     height: 30px;
     border: none;
     font-weight: bold;
@@ -62,14 +67,14 @@ form {
 .card {
   display: flex;
   justify-content: space-between;
-  background-color: #198f1f;
+  background-color: aliceblue;
   margin: 10px;
   padding: 2px;
   width: 400px;
   border-radius: 10px;
 
   & p {
-    color: #9df809;
+    color: #71aa14;
     font-weight: bold;
   }
 
