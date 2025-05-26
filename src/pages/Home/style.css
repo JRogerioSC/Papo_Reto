@@ -76,6 +76,7 @@ form {
   & p {
     color: #71aa14;
     font-weight: bold;
+    text-transform: capitalize;
   }
 
   & span {
