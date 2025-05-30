@@ -15,9 +15,14 @@ body {
 
 
   body {
+    align-items: center;
     min-height: 50vh;
     width: 84vw;
     background: rgb(13, 13, 14);
+  }
+
+  .container{
+    align-items: center;
   }
 
   form {
