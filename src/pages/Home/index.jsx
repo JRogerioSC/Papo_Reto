@@ -11,9 +11,11 @@ function Home() {
   const inputMenssage = useRef()
 
   async function getUsers() {
+
     const usersFromApi = await api.get('/usuarios')
 
-    setUsers = (usersFromApi.data)
+    setUsers(usersFromApi.data)
+
   }
 
   async function createUsers() {
