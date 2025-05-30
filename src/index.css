@@ -8,7 +8,7 @@
 body {
   min-height: 100vh;
   width: 100vw;
-  background: rgb(17, 17, 153);
+  background: rgb(23, 23, 26);
 }
 
 @media(max-width:750px) {
@@ -18,7 +18,7 @@ body {
     align-items: center;
     min-height: 50vh;
     width: 84vw;
-    background: rgb(13, 13, 14);
+    background: rgb(231, 231, 238);
   }
 
   .container{
