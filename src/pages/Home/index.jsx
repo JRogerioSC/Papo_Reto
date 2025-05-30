@@ -1,24 +1,42 @@
+import { useEffect, useState, useRef } from 'react'
 import './style.css'
 import Trash from '../../assets/trash.svg'
+import api from '../../services/api'
 
 
 function Home() {
+  const [users, setUsers] = useState([])
 
-  const users = [{
-    id: '0000066677788',
-    name:'Rogerio',
-    menssage: 'blablabla'
-  },
-  {
-    id: '0000066677733',
-    name:'Mario',
-    menssage: 'blobloblo'
-  },
-   {id: '0000066677755',
-    name:'Joao',
-    menssage: 'bliblibli'
-   }
-  ]
+  const inputName = useRef()
+  const inputMenssage = useRef()
+
+  async function getUsers() {
+    const usersFromApi = await api.get('/usuarios')
+
+    setUsers = (usersFromApi.data)
+  }
+
+  async function createUsers() {
+    await api.post('/usuarios', {
+      name: inputName.current.value,
+      menssage: inputMenssage.current.value
+    })
+
+    getUsers()
+
+  }
+
+  async function deleteUsers(id) {
+    await api.delete(`/usuarios/${id}`)
+
+    getUsers()
+
+  }
+
+  useEffect(() => {
+    getUsers()
+
+  }, [])
 
 
   return (
@@ -28,12 +46,12 @@ function Home() {
       <h1>Papo_Reto</h1>
 
       {users.map((user) => (
-        <div key={user.id}className='card'>
+        <div key={user.id} className='card'>
           <div>
             <span><p># {user.name} # :</p></span>
             <span>{user.menssage}</span>
           </div>
-          <button>
+          <button onClick={() => deleteUsers(user.id)}>
             <img src={Trash} />
           </button>
         </div>
@@ -41,16 +59,16 @@ function Home() {
 
       <form>
 
-        <input placeholder='Nome' className='nome' name="nome" type='text' />
+        <input placeholder='Nome' className='nome' name="nome" type='text' ref={inputName} />
 
-        <input placeholder='Menssagem' className='menssage' name="menssagem" type='text' />
+        <input placeholder='Menssagem' className='menssage' name="menssagem" type='text' ref={inputMenssage} />
 
 
       </form>
 
-      <button className='enviar' type='button'>ENVIAR</button>
+      <button className='enviar' type='button' onClick={createUsers}>ENVIAR</button>
 
-      
+
     </div>
   )
 }
