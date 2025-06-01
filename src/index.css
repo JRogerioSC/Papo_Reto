@@ -15,14 +15,18 @@ body {
 
 
   body {
+    display: flex;
+    flex-direction: column;
     align-items: center;
     min-height: 50vh;
-    width: 84vw;
+    width: 100vw;
     background: rgb(8, 8, 12);
   }
 
-  .container{
-    align-items: center;
+  .container {
+    display: flex;
+    flex-direction: column;
+    padding: 4%;
   }
 
   form {
@@ -44,6 +48,7 @@ body {
     padding: 9px;
     width: 250px;
     border-radius: 10px;
+    margin-top: 1px;
 
   }
 
@@ -52,9 +57,11 @@ body {
     background-color: rgb(96, 134, 168);
     color: rgb(235, 242, 248);
     height: 30px;
+    width: 50px;
     border: none;
     font-weight: bold;
     cursor: pointer;
+    margin: -40px;
   }
 
   .menssage {
@@ -64,17 +71,20 @@ body {
     height: 50px;
     background-color: #dcdce9;
     outline: none;
-    margin: 2px;
-    padding: 9px;
-    width: 135px;
+    padding: 20px;
+    width: 170px;
+    margin-top: 2px 5px;
   }
 
   .nome {
-  border: 1px solid #48456c;
-  border-radius: 30px;
-  height: 30px;
-  width: 160px;
-  background-color: #dcdce9;
-  outline: none;
-}
+    border: 1px solid #48456c;
+    border-radius: 30px;
+    padding: 20px;
+    height: 30px;
+    width: 150px;
+    background-color: #dcdce9;
+    outline: none;
+    margin-top: 2px 5px;
+
+  }
 }
