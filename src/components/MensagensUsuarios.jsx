@@ -18,7 +18,7 @@ function MensagensUsuarios() {
     };
 
     buscarUsuarios();
-    const intervalo = setInterval(buscarUsuarios, 1000);
+    const intervalo = setInterval(buscarUsuarios, 5000);
     return () => clearInterval(intervalo);
   }, []);
 
@@ -40,4 +40,4 @@ function MensagensUsuarios() {
   );
 }
 
-export default MensagensUsuarios;
+export default MensagensUsuarios
