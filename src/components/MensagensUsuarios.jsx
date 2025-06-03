@@ -18,22 +18,24 @@ function MensagensUsuarios() {
     };
 
     buscarUsuarios();
-    const intervalo = setInterval(buscarUsuarios, 1000);
+    const intervalo = setInterval(buscarUsuarios, 5000);
     return () => clearInterval(intervalo);
   }, []);
 
   return (
     <div>
-
-
-
-      {usuarios.map((user) => (
-        <li key={user.id}>
-          <strong>{user.name}:</strong> {user.menssage}
-        </li>
-      ))}
-
-
+      <h2>Mensagens dos Usuários</h2>
+      {carregando ? (
+        <p>Carregando...</p>
+      ) : (
+        <ul>
+          {usuarios.map((user) => (
+            <li key={user.id}>
+              <strong>{user.name}:</strong> {user.menssage}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
