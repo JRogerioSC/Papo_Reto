@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react'
-import MensagensUsuarios from '../../components/DadosBackend'
 import './style.css'
 import Trash from '../../assets/trash.svg'
 import api from '../../services/api'
@@ -9,6 +8,13 @@ function Home() {
 
   const inputName = useRef()
   const inputMenssage = useRef()
+
+  const scrollScreen = () => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth"
+    })
+  }
 
   async function getUsers() {
 
