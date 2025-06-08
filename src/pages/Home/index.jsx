@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import './style.css'
 import Trash from '../../assets/trash.svg'
+import File from '../../assets/file.svg'
+import Refresh from '../../assets/refresh.svg'
 import api from '../../services/api'
 
 function Home() {
@@ -9,14 +11,21 @@ function Home() {
   const inputName = useRef()
   const inputMenssage = useRef()
 
-  const scrollScreen = () => {
-    window.scrollTo({
-      top: document.body.scrollHeight,
-      behavior: "smooth"
-    })
-  }
 
   async function getUsers() {
+
+    const scrollScreen = () => {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+      })
+    }
+
+    const processMenssage = ({ data }) => {
+      const { } = JSON.parse(data)
+
+      scrollScreen()
+    }
 
     const usersFromApi = await api.get('/usuarios')
 
@@ -28,6 +37,7 @@ function Home() {
     await api.post('/usuarios', {
       name: inputName.current.value,
       menssage: inputMenssage.current.value
+
     })
 
     getUsers()
@@ -71,9 +81,17 @@ function Home() {
         <input placeholder='Menssagem' className='menssage' name="menssagem" type='text' ref={inputMenssage} />
 
 
+
+
       </form>
 
       <button className='enviar' type='button' onClick={createUsers}>ENVIAR</button>
+
+      <div className='arquivo'>
+
+        <input className='file' type='file' imag src={File} /> <button className='refresh'><img src={Refresh} /></button>
+
+      </div>
 
 
 
