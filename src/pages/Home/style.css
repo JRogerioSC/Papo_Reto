@@ -96,19 +96,28 @@ form {
 
 }
 
-.refresh{
-    display: flex;
-    margin-top: 5px;
-    border-radius: 7px;
-    align-self: 10px;
-    margin-left: 190px;
-    margin-top: -2%;
-    outline: #2514bd;
-    cursor: pointer;
+.refresh {
+  display: flex;
+  margin-top: 5px;
+  border-radius: 7px;
+  align-self: 10px;
+  margin-left: 190px;
+  margin-top: -2%;
+  outline: #2514bd;
+  cursor: pointer;
 
-  }
+}
 
-  .refresh :hover{
-    color: #5044b6;
-    opacity: 0.5;
-  }
+.refresh :hover {
+  color: #5044b6;
+  opacity: 0.5;
+}
+
+.chat-box {
+  height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
