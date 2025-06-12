@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
 import axios from 'axios';
-import WebSocket from 'ws';
 import './style.css'
 import Refresh from '../../assets/refresh.svg'
 import Trash from '../../assets/trash.svg'
@@ -85,9 +84,6 @@ function Home() {
         ENVIAR
       </button>
 
-      <button className='refresh' onClick={() => window.location.reload()}>
-        <img src={Refresh} alt='Recarregar' />
-      </button>
     </div>
   )
 }
