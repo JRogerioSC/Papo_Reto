@@ -1,47 +1,51 @@
-import { useEffect, useState, useRef } from 'react'
-import axios from 'axios';
-import './style.css'
-import Refresh from '../../assets/refresh.svg'
-import Trash from '../../assets/trash.svg'
-import api from '../../services/api'
+import { useEffect, useState, useRef } from 'react';
+import './style.css';
+import Refresh from '../../assets/refresh.svg';
+import Trash from '../../assets/trash.svg';
+import api from '../../services/api';
 
 function Home() {
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState([]);
+  const socketRef = useRef(null);
 
-  const inputName = useRef()
-  const inputMenssage = useRef()
-  const scrollRef = useRef() // 🔽 Referência para rolar
+  const inputName = useRef();
+  const inputMenssage = useRef();
+  const scrollRef = useRef();
 
-  async function getUsers() {
-    const usersFromApi = await api.get('/usuarios')
-    setUsers(usersFromApi.data)
-  }
+  useEffect(() => {
+    // Conecta com o WebSocket
+    socketRef.current = new WebSocket('ws://api-papo-reto.onrender.com');
 
-  async function createUsers() {
+    socketRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'UPDATE_USERS') {
+        setUsers(data.payload);
+      }
+    };
+
+    // Fecha conexão ao sair
+    return () => socketRef.current?.close();
+  }, []);
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [users]);
+
+  const createUsers = async () => {
+    if (!inputName.current.value || !inputMenssage.current.value) return;
+
     await api.post('/usuarios', {
       name: inputName.current.value,
-      menssage: inputMenssage.current.value
-    })
+      menssage: inputMenssage.current.value,
+    });
 
-    inputName.current.value = ''
-    inputMenssage.current.value = ''
+    inputName.current.value = '';
+    inputMenssage.current.value = '';
+  };
 
-    getUsers()
-  }
-
-  async function deleteUsers(id) {
-    await api.delete(`/usuarios/${id}`)
-    getUsers()
-  }
-
-  useEffect(() => {
-    getUsers()
-  }, [])
-
-  // 🔁 Rola até a última mensagem sempre que "users" muda
-  useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [users])
+  const deleteUsers = async (id) => {
+    await api.delete(`/usuarios/${id}`);
+  };
 
   return (
     <div className='container'>
@@ -58,8 +62,6 @@ function Home() {
           </button>
         </div>
       ))}
-
-      {/* 🔽 Elemento invisível que serve de âncora para o scroll */}
       <div ref={scrollRef}></div>
 
       <form>
@@ -87,47 +89,7 @@ function Home() {
         <img src={Refresh} alt='Recarregar' />
       </button>
     </div>
-  )
-}
-
-
-
-
-function ChatComponent() {
-  const [mensagens, setMensagens] = useState([]);
-  const fimDoChatRef = useRef(null);
-
-  // Buscar mensagens da API
-  useEffect(() => {
-    const buscarMensagens = async () => {
-      const res = await axios.get('https://api-papo-reto.onrender.com/usuarios');
-      setMensagens(res.data);
-    };
-
-    buscarMensagens();
-
-    // Opcional: auto atualização a cada 5 segundos
-    const intervalo = setInterval(buscarMensagens, 5000);
-    return () => clearInterval(intervalo);
-  }, []);
-
-  // Scroll automático sempre que mensagens mudarem
-  useEffect(() => {
-    fimDoChatRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [mensagens]);
-
-  return (
-    <div style={{ height: '400px', overflowY: 'auto', border: '1px solid #ccc', padding: '1rem' }}>
-      {mensagens.map((msg) => (
-        <div key={msg.id}>
-          <strong>{msg.name}:</strong> {msg.menssage}
-        </div>
-      ))}
-      <div ref={fimDoChatRef} />
-    </div>
   );
-
 }
-
 
 export default Home;
