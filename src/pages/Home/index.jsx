@@ -7,11 +7,15 @@ import api from '../../services/api'
 
 function Home() {
   const [users, setUsers] = useState([])
-  const socketRef = useRef(null)
 
   const inputName = useRef()
   const inputMenssage = useRef()
-  const scrollRef = useRef()
+  const scrollRef = useRef() // 🔽 Referência para rolar
+
+  async function getUsers() {
+    const usersFromApi = await api.get('/usuarios')
+    setUsers(usersFromApi.data)
+  }
 
   async function createUsers() {
     await api.post('/usuarios', {
@@ -21,27 +25,20 @@ function Home() {
 
     inputName.current.value = ''
     inputMenssage.current.value = ''
+
+    getUsers()
   }
 
   async function deleteUsers(id) {
     await api.delete(`/usuarios/${id}`)
+    getUsers()
   }
 
   useEffect(() => {
-    // Conecta com o WebSocket
-    socketRef.current = new WebSocket('wss://api-papo-reto.onrender.com')
-
-    socketRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      if (data.type === 'UPDATE_USERS') {
-        setUsers(data.payload)
-      }
-    }
-
-    // Fecha conexão no unload
-    return () => socketRef.current?.close()
+    getUsers()
   }, [])
 
+  // 🔁 Rola até a última mensagem sempre que "users" muda
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [users])
@@ -61,6 +58,8 @@ function Home() {
           </button>
         </div>
       ))}
+
+      {/* 🔽 Elemento invisível que serve de âncora para o scroll */}
       <div ref={scrollRef}></div>
 
       <form>
@@ -84,8 +83,51 @@ function Home() {
         ENVIAR
       </button>
 
+      <button className='refresh' onClick={() => window.location.reload()}>
+        <img src={Refresh} alt='Recarregar' />
+      </button>
     </div>
   )
 }
 
-export default Home
+
+
+
+function ChatComponent() {
+  const [mensagens, setMensagens] = useState([]);
+  const fimDoChatRef = useRef(null);
+
+  // Buscar mensagens da API
+  useEffect(() => {
+    const buscarMensagens = async () => {
+      const res = await axios.get('https://api-papo-reto.onrender.com/usuarios');
+      setMensagens(res.data);
+    };
+
+    buscarMensagens();
+
+    // Opcional: auto atualização a cada 5 segundos
+    const intervalo = setInterval(buscarMensagens, 5000);
+    return () => clearInterval(intervalo);
+  }, []);
+
+  // Scroll automático sempre que mensagens mudarem
+  useEffect(() => {
+    fimDoChatRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [mensagens]);
+
+  return (
+    <div style={{ height: '400px', overflowY: 'auto', border: '1px solid #ccc', padding: '1rem' }}>
+      {mensagens.map((msg) => (
+        <div key={msg.id}>
+          <strong>{msg.name}:</strong> {msg.menssage}
+        </div>
+      ))}
+      <div ref={fimDoChatRef} />
+    </div>
+  );
+
+}
+
+
+export default Home;
