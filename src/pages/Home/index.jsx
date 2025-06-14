@@ -100,7 +100,7 @@ function ChatComponent() {
   // Buscar mensagens da API
   useEffect(() => {
     const buscarMensagens = async () => {
-      const res = await axios.get('https://api-papo-reto.onrender.com');
+      const res = await axios.get('https://api-papo-reto.onrender.com/usuarios');
       setMensagens(res.data);
     };
 
