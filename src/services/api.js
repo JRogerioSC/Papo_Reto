@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-   baseURL: 'https://api-papo-reto.onrender.com'
+   baseURL: 'localhost:3001/usuarios'
 })
 
 export default api
