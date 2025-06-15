@@ -91,43 +91,4 @@ function Home() {
 }
 
 
-
-
-function ChatComponent() {
-  const [mensagens, setMensagens] = useState([]);
-  const fimDoChatRef = useRef(null);
-
-  // Buscar mensagens da API
-  useEffect(() => {
-    const buscarMensagens = async () => {
-      const res = await axios.get('https://api-papo-reto.onrender.com');
-      setMensagens(res.data);
-    };
-
-    buscarMensagens();
-
-    // Opcional: auto atualização a cada 5 segundos
-    const intervalo = setInterval(buscarMensagens, 5000);
-    return () => clearInterval(intervalo);
-  }, []);
-
-  // Scroll automático sempre que mensagens mudarem
-  useEffect(() => {
-    fimDoChatRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [mensagens]);
-
-  return (
-    <div style={{ height: '400px', overflowY: 'auto', border: '1px solid #ccc', padding: '1rem' }}>
-      {mensagens.map((msg) => (
-        <div key={msg.id}>
-          <strong>{msg.name}:</strong> {msg.menssage}
-        </div>
-      ))}
-      <div ref={fimDoChatRef} />
-    </div>
-  );
-
-}
-
-
 export default Home;
