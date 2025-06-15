@@ -15,7 +15,7 @@ import { getAnalytics } from "firebase/analytics";
     messagingSenderId: "952785633903",
     appId: "1:952785633903:web:09c0b6eef083ffca3f039a",
     measurementId: "G-JLX5JEWWEY"
-  };
+    };
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
