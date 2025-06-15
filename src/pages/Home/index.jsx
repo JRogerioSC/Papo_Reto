@@ -1,5 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
+import './style.css'
+import Refresh from '../../assets/refresh.svg'
+import Trash from '../../assets/trash.svg'
+import api from '../../services/api'
+
 
 const PUBLIC_VAPID_KEY = 'BAM2A8BBYTZFhn1T2GbOqEdyPi3N1bl0-DaFq5mK1wYYb1w5zD1zZKcUdsyPa-fTrLYUAvuZMsXox8Z71-l9g3Y'
 
@@ -73,11 +78,16 @@ function Home() {
       <div ref={scrollRef}></div>
 
       <form>
-        <input ref={inputName} placeholder='Nome' />
-        <input ref={inputMenssage} placeholder='Mensagem' />
+        <input className='nome' ref={inputName} placeholder='Nome' />
+        <input className='menssage' ref={inputMenssage} placeholder='Mensagem' />
       </form>
 
-      <button onClick={createUsers}>ENVIAR</button>
+      <button className='enviar' onClick={createUsers}>ENVIAR</button>
+
+      <button className='refresh' onClick={getUsers}>
+        <img src={Refresh} alt='Recarregar' />
+      </button>
+
     </div>
   )
 }
