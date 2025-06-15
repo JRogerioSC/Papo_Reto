@@ -13,6 +13,15 @@ body {
   align-self: flex-end;
 }
 
+.delete {
+  height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
 @media(max-width:750px) {
 
 
@@ -22,7 +31,7 @@ body {
     align-items: center;
     min-height: 50vh;
     width: 100vw;
-    background-color: #030116 ;
+    background-color: #030116;
   }
 
   .container {
@@ -90,7 +99,7 @@ body {
 
   }
 
-  .refresh{
+  .refresh {
     display: flex;
     margin-top: 5px;
     border-radius: 7px;
@@ -101,9 +110,18 @@ body {
 
   }
 
-  .refresh :hover{
+  .refresh :hover {
     color: #5044b6;
     opacity: 0.5;
+  }
+
+  .delete {
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 8px;
   }
 
 }

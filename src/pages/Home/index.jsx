@@ -71,7 +71,7 @@ function Home() {
             <span><p># {user.name} # :</p></span>
             <span>{user.menssage}</span>
           </div>
-          <button onClick={() => deleteUsers(user.id)}>🗑</button>
+          <button className='delete' onClick={() => deleteUsers(user.id)}>🗑</button>
         </div>
       ))}
 
