@@ -1,45 +1,57 @@
 import { useEffect, useState, useRef } from 'react'
-import axios from 'axios';
-import './style.css'
-import Refresh from '../../assets/refresh.svg'
-import Trash from '../../assets/trash.svg'
-import api from '../../services/api'
-import '../../firebase'
+import axios from 'axios'
+
+const PUBLIC_VAPID_KEY = 'BAM2A8BBYTZFhn1T2GbOqEdyPi3N1bl0-DaFq5mK1wYYb1w5zD1zZKcUdsyPa-fTrLYUAvuZMsXox8Z71-l9g3Y'
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = atob(base64)
+  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)))
+}
 
 function Home() {
   const [users, setUsers] = useState([])
-
   const inputName = useRef()
   const inputMenssage = useRef()
-  const scrollRef = useRef() // 🔽 Referência para rolar
+  const scrollRef = useRef()
 
   async function getUsers() {
-    const usersFromApi = await api.get('/usuarios')
-    setUsers(usersFromApi.data)
+    const res = await axios.get('https://api-papo-reto.onrender.com/usuarios')
+    setUsers(res.data)
   }
 
   async function createUsers() {
-    await api.post('/usuarios', {
+    await axios.post('https://api-papo-reto.onrender.com/usuarios', {
       name: inputName.current.value,
       menssage: inputMenssage.current.value
     })
-
     inputName.current.value = ''
     inputMenssage.current.value = ''
-
     getUsers()
   }
 
   async function deleteUsers(id) {
-    await api.delete(`/usuarios/${id}`)
+    await axios.delete(`https://api-papo-reto.onrender.com/usuarios/${id}`)
     getUsers()
+  }
+
+  async function subscribeToPush() {
+    if ('serviceWorker' in navigator) {
+      const register = await navigator.serviceWorker.register('/sw.js')
+      const subscription = await register.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+      })
+      await axios.post('https://api-papo-reto.onrender.com/subscribe', subscription)
+    }
   }
 
   useEffect(() => {
     getUsers()
+    subscribeToPush()
   }, [])
 
-  // 🔁 Rola até a última mensagem sempre que "users" muda
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [users])
@@ -48,50 +60,26 @@ function Home() {
     <div className='container'>
       <h1>Papo_Reto</h1>
 
-      {users.map((user) => (
+      {users.map(user => (
         <div key={user.id} className='card'>
           <div>
             <span><p># {user.name} # :</p></span>
             <span>{user.menssage}</span>
           </div>
-          <button onClick={() => deleteUsers(user.id)}>
-            <img src={Trash} alt='Excluir' />
-          </button>
+          <button onClick={() => deleteUsers(user.id)}>🗑</button>
         </div>
       ))}
 
-      {/* 🔽 Elemento invisível que serve de âncora para o scroll */}
       <div ref={scrollRef}></div>
 
       <form>
-        <input
-          placeholder='Nome'
-          className='nome'
-          name='nome'
-          type='text'
-          ref={inputName}
-        />
-        <input
-          placeholder='Mensagem'
-          className='menssage'
-          name='menssage'
-          type='text'
-          ref={inputMenssage}
-        />
+        <input ref={inputName} placeholder='Nome' />
+        <input ref={inputMenssage} placeholder='Mensagem' />
       </form>
 
-      <button className='enviar' type='button' onClick={createUsers}>
-        ENVIAR
-      </button>
-
-      <button className='refresh' onClick={getUsers}>
-        <img src={Refresh} alt='Recarregar' />
-      </button>
-
+      <button onClick={createUsers}>ENVIAR</button>
     </div>
   )
-
 }
 
-
-export default Home;
+export default Home
