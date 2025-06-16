@@ -33,7 +33,6 @@ function Home() {
       menssage: inputMenssage.current.value
     })
     inputName.current.value = ''
-    inputMenssage.current.value = ''
     getUsers()
   }
 
