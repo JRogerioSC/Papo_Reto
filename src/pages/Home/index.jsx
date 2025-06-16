@@ -32,7 +32,7 @@ function Home() {
       name: inputName.current.value,
       menssage: inputMenssage.current.value
     })
-    inputName.current.value = ''
+    inputMenssage.current.value = ''
     getUsers()
   }
 
