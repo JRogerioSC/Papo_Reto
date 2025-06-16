@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import './style.css'
 import Refresh from '../../assets/refresh.svg'
+import MenssagensNews from '../../assets/menssagensNews.png'
 import Trash from '../../assets/trash.svg'
 import api from '../../services/api'
 
@@ -71,7 +72,7 @@ function Home() {
             <span><p># {user.name} # :</p></span>
             <span>{user.menssage}</span>
           </div>
-          <button className='delete' onClick={() => deleteUsers(user.id)}>🗑</button>
+          <button onClick={() => deleteUsers(user.id)}>🗑</button>
         </div>
       ))}
 

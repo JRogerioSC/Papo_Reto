@@ -112,12 +112,3 @@ form {
   color: #5044b6;
   opacity: 0.5;
 }
-
-.chat-box {
-  height: 400px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-}
