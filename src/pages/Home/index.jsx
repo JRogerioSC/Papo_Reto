@@ -28,14 +28,28 @@ function Home() {
   }
 
   async function createUsers() {
-    await axios.post('https://api-papo-reto.onrender.com/usuarios', {
-      name: inputName.current.value,
-      menssage: inputMenssage.current.value
-    })
+    const name = inputName.current.value.trim();
+    const menssage = inputMenssage.current.value.trim();
+
+    if (name && menssage) {
+      try {
+        await axios.post('https://api-papo-reto.onrender.com/usuarios', {
+          name: name,
+          menssage: menssage
+        });
+        alert('Nova Mensagem!');
+      } catch (error) {
+        console.error("Erro ao criar usuário:", error);
+      }
+    } else {
+      alert("Preencha todos os campos antes de enviar.");
+    }
 
     inputMenssage.current.value = ''
     getUsers()
+
   }
+
 
   async function deleteUsers(id) {
     await axios.delete(`https://api-papo-reto.onrender.com/usuarios/${id}`)
@@ -83,7 +97,7 @@ function Home() {
         <input className='menssage' ref={inputMenssage} placeholder='Mensagem' />
       </form>
 
-      <button className='enviar' onClick={createUsers}>ENVIAR</button>{alert('Nova Menssagem !')}
+      <button className='enviar' onClick={createUsers}>ENVIAR</button>
 
       <button className='refresh' onClick={getUsers}>
         <img src={Refresh} alt='Recarregar' />
