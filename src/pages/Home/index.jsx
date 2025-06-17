@@ -37,7 +37,6 @@ function Home() {
           name: name,
           menssage: menssage
         });
-        alert('Nova Mensagem!');
       } catch (error) {
         console.error("Erro ao criar usuário:", error);
       }
