@@ -32,6 +32,7 @@ function Home() {
       name: inputName.current.value,
       menssage: inputMenssage.current.value
     })
+
     inputMenssage.current.value = ''
     getUsers()
   }
@@ -82,7 +83,7 @@ function Home() {
         <input className='menssage' ref={inputMenssage} placeholder='Mensagem' />
       </form>
 
-      <button className='enviar' onClick={createUsers}>ENVIAR</button>
+      <button className='enviar' onClick={createUsers}>ENVIAR</button>{alert('Nova Menssagem !')}
 
       <button className='refresh' onClick={getUsers}>
         <img src={Refresh} alt='Recarregar' />
