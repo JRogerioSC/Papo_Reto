@@ -7,7 +7,7 @@ import Trash from '../../assets/trash.svg'
 import api from '../../services/api'
 
 
-const PUBLIC_VAPID_KEY = 'BAM2A8BBYTZFhn1T2GbOqEdyPi3N1bl0-DaFq5mK1wYYb1w5zD1zZKcUdsyPa-fTrLYUAvuZMsXox8Z71-l9g3Y'
+const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
