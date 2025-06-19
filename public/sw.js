@@ -1,13 +1,9 @@
 self.addEventListener('push', event => {
-  const message = event.data?.text() || 'No message received';
-
+  const data = event.data?.json()
   event.waitUntil(
-    Promise.resolve(message).then(body => {
-      self.registration.showNotification('Notification', {
-        body: body,
-        icon: '/menssagensNews.png'
-      })
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: <img src={menssagensNews.png} alt='notificacao' />
     })
   )
 })
-
