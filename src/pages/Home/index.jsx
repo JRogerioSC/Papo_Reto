@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import './style.css'
 import Refresh from '../../assets/refresh.svg'
-import MenssagensNews from '../../assets/menssagensNews.png'
+import Notificacao from '../../assets/notificacao.png'
 import Trash from '../../assets/trash.svg'
 import api from '../../services/api'
 
