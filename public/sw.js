@@ -1,21 +1,9 @@
 self.addEventListener('push', event => {
-  let data = { title: 'Default Title', body: 'Default body' }
-
-  try {
-    if (event.data) {
-      data = event.data.json()
-    }
-  } catch (e) {
-    // Fallback: treat it as plain text
-    data = {
-      title: 'Notification',
-      body: event.data.text()
-    }
-  }
+  const message = event.data?.text() || 'No message received';
 
   event.waitUntil(
-    Promise.resolve(data.body).then(body => {
-      self.registration.showNotification(data.title, {
+    Promise.resolve(message).then(body => {
+      self.registration.showNotification('Notification', {
         body: body,
         icon: '/menssagensNews.png'
       })
