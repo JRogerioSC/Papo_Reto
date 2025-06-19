@@ -50,7 +50,7 @@ function Home() {
 
 
   async function deleteUsers(id) {
-    await axios.delete('https: //api-papo-reto.onrender.com/usuarios/${id}')
+    await axios.delete(`https://api-papo-reto.onrender.com/usuarios/${id}`)
     getUsers()
   }
 
