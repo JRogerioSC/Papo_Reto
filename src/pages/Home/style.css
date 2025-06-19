@@ -112,14 +112,3 @@ form {
   color: #5044b6;
   opacity: 0.5;
 }
-
-.excluir{
-  display: flex;
-  margin-top: 5px;
-  border-radius: 7px;
-  align-self: 10px;
-  margin-left: 190px;
-  margin-top: -2%;
-  outline: #2514bd;
-  cursor: pointer;
-}
