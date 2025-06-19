@@ -1,10 +1,13 @@
 
-self.addEventListener('push', event => {
-  const data = event.data?.json()
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/menssagensNews.png'
-    })
-  )
-})
+self.addEventListener('push', function(event) {
+    const data = event.data ? event.data.text() : 'No payload';
+
+    event.waitUntil(
+        data.then(text => {
+            self.registration.showNotification('Push Received', {
+                body: text,
+                icon: 'menssagensNews.png'
+            });
+        })
+    );
+});
