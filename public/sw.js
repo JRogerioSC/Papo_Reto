@@ -1,3 +1,25 @@
+// service-worker.js
+
+self.addEventListener('push', function(event) {
+  let data = { title: 'Nova Menssagem!', body: '', icon: 'icon-Notificacao.png', data: {} };
+
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || '/icon-Notificacao.png', // Ícone padrão, se não enviado
+    data: {
+      url: data.data?.url || 'https://pap0reto.netlify.app/' // URL para abrir ao clicar
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
@@ -16,3 +38,4 @@ self.addEventListener('notificationclick', function(event) {
     })
   );
 });
+
