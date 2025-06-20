@@ -5,7 +5,7 @@ import Refresh from '../../assets/refresh.svg'
 import api from '../../services/api'
 
 
-const PUBLIC_VAPID_KEY = 'BPGMsIu_BRY2llkG2T4drn3-SsFjhoazXB6JMs6VkDqbNzUAf4vRhkY_E_OaQ_e_UpKKIBsRAUaPzYASrBhs72U'
+const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
