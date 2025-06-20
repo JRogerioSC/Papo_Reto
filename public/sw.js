@@ -23,7 +23,7 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || '/';
+  const urlToOpen = event.notification.data?.url || 'https://cdn-icons-png.flaticon.com/512/484/484662.png';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
