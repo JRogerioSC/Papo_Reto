@@ -1,7 +1,7 @@
 // service-worker.js
 
 self.addEventListener('push', function(event) {
-  let data = { title: 'Nova Menssagem!', body: '', icon: 'icon-Notificacao.png', data: {} };
+  let data = { title: 'Nova Menssagem!', body: '', icon: 'https://ibb.co/5WGQDvGy', data: {} };
 
   if (event.data) {
     data = JSON.parse(event.data.text());
@@ -23,7 +23,7 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || '/';
+  const urlToOpen = event.notification.data?.url || 'https://ibb.co/5WGQDvGy';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
