@@ -9,7 +9,7 @@ self.addEventListener('push', function(event) {
 
   const options = {
     body: data.body,
-    icon: data.icon || '/icon-Notificacao.png', // Ícone padrão, se não enviado
+    icon: data.icon || 'https://ibb.co/5WGQDvGy', // Ícone padrão, se não enviado
     data: {
       url: data.data?.url || 'https://pap0reto.netlify.app/' // URL para abrir ao clicar
     }
