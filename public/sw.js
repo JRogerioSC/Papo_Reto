@@ -23,7 +23,7 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || 'https://ibb.co/5WGQDvGy';
+  const urlToOpen = event.notification.data?.url || '/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
