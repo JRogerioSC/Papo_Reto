@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import './style.css'
-import Refresh from '../../assets/refresh.svg'
 import { io } from 'socket.io-client'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -159,9 +158,6 @@ function Home() {
 
       <button className='enviar' onClick={createUsers}>ENVIAR</button>
 
-      <button className='refresh' onClick={getUsers}>
-        <img src={Refresh} alt='Recarregar' />
-      </button>
     </div>
   )
 }
