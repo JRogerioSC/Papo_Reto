@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
+const ICON_URL = 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png'
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
@@ -70,7 +71,6 @@ function Home() {
     getUsers()
     subscribeToPush()
 
-    // Conexão WebSocket
     socketRef.current = io(BACKEND_URL)
 
     socketRef.current.on('connect', () => {
@@ -79,7 +79,17 @@ function Home() {
     })
 
     socketRef.current.on('nova_mensagem', msg => {
-      toast.info(`💬 Nova mensagem de ${msg.name}: ${msg.menssage}`)
+      toast.info(`💬 Nova mensagem de ${msg.name}: ${msg.menssage}`, {
+        icon: ({ theme, type }) => (
+          <img
+            src={ICON_URL}
+            alt="Icon"
+            style={{ width: 24, height: 24, borderRadius: 4 }}
+          />
+        ),
+        autoClose: 4000,
+        position: 'top-center'
+      })
       getUsers()
     })
 
@@ -119,10 +129,9 @@ function Home() {
         <img src={Refresh} alt='Recarregar' />
       </button>
 
-      <ToastContainer position='top-center' autoClose={4000} />
+      <ToastContainer />
     </div>
   )
 }
 
 export default Home
-
