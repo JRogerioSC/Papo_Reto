@@ -1,8 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import './style.css'
-import Refresh from '../../assets/refresh.svg'
 import api from '../../services/api'
+import { io } from 'socket.io-client'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { register } from './serviceWorkerRegistration'
+
+register()
+
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
@@ -108,9 +114,6 @@ function Home() {
 
       <button className='enviar' onClick={createUsers}>ENVIAR</button>
 
-      <button className='refresh' onClick={getUsers}>
-        <img src={Refresh} alt='Recarregar' />
-      </button>
     </div>
   )
 }

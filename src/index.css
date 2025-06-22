@@ -91,20 +91,4 @@ body {
 
   }
 
-  .refresh {
-    display: flex;
-    margin-top: 5px;
-    border-radius: 7px;
-    align-self: flex-end;
-    margin: 13px;
-    outline: #2514bd;
-    cursor: pointer;
-
-  }
-
-  .refresh :hover {
-    color: #5044b6;
-    opacity: 0.5;
-  }
-
 }
