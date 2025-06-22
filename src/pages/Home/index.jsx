@@ -2,16 +2,9 @@ import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import './style.css'
 import Refresh from '../../assets/refresh.svg'
-import { io } from 'socket.io-client'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import { register } from './serviceWorkerRegistration'
-
-register()
-
+import api from '../../services/api'
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
-const ICON_URL = 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png'
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
@@ -25,13 +18,14 @@ function Home() {
   const inputName = useRef()
   const inputMenssage = useRef()
   const scrollRef = useRef()
-  const socketRef = useRef(null)
-
-  const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
   async function getUsers() {
-    const res = await axios.get(`${BACKEND_URL}/usuarios`)
-    setUsers(res.data)
+    try {
+      const res = await axios.get('https://api-papo-reto.onrender.com/usuarios')
+      setUsers(res.data)
+    } catch (error) {
+      console.error('Erro ao buscar mensagens:', error)
+    }
   }
 
   async function createUsers() {
@@ -40,34 +34,42 @@ function Home() {
 
     if (name && menssage) {
       try {
-        await axios.post(`${BACKEND_URL}/usuarios`, {
+        await axios.post('https://api-papo-reto.onrender.com/usuarios', {
           name,
           menssage
         })
       } catch (error) {
         console.error('Erro ao criar usuário:', error)
       }
-    } else {
-      toast.warning('Preencha todos os campos antes de enviar.')
-    }
 
-    inputMenssage.current.value = ''
-    getUsers()
+      inputMenssage.current.value = ''
+      getUsers()
+    } else {
+      alert('Preencha todos os campos antes de enviar.')
+    }
   }
 
   async function deleteUsers(id) {
-    await axios.delete(`${BACKEND_URL}/usuarios/${id}`)
-    getUsers()
+    try {
+      await axios.delete(`https://api-papo-reto.onrender.com/usuarios/${id}`)
+      getUsers()
+    } catch (error) {
+      console.error('Erro ao deletar mensagem:', error)
+    }
   }
 
   async function subscribeToPush() {
     if ('serviceWorker' in navigator) {
-      const register = await navigator.serviceWorker.register('/sw.js')
-      const subscription = await register.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
-      })
-      await axios.post(`${BACKEND_URL}/subscribe`, subscription)
+      try {
+        const register = await navigator.serviceWorker.register('/sw.js')
+        const subscription = await register.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+        })
+        await axios.post('https://api-papo-reto.onrender.com/subscribe', subscription)
+      } catch (error) {
+        console.error('Erro ao se inscrever para notificações:', error)
+      }
     }
   }
 
@@ -75,31 +77,8 @@ function Home() {
     getUsers()
     subscribeToPush()
 
-    socketRef.current = io(BACKEND_URL)
-
-    socketRef.current.on('connect', () => {
-      const nome = inputName.current?.value || 'visitante'
-      socketRef.current.emit('register', nome)
-    })
-
-    socketRef.current.on('nova_mensagem', msg => {
-      toast.info(`💬 Nova mensagem de ${msg.name}: ${msg.menssage}`, {
-        icon: ({ theme, type }) => (
-          <img
-            src={ICON_URL}
-            alt="Icon"
-            style={{ width: 24, height: 24, borderRadius: 4 }}
-          />
-        ),
-        autoClose: 4000,
-        position: 'top-center'
-      })
-      getUsers()
-    })
-
-    return () => {
-      socketRef.current?.disconnect()
-    }
+    const interval = setInterval(getUsers, 3000) // Atualiza a cada 3s
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
@@ -132,11 +111,9 @@ function Home() {
       <button className='refresh' onClick={getUsers}>
         <img src={Refresh} alt='Recarregar' />
       </button>
-
-      <ToastContainer />
     </div>
   )
-
 }
 
 export default Home
+
