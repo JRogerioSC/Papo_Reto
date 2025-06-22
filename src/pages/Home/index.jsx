@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import './style.css'
 import Refresh from '../../assets/refresh.svg'
+import { io } from 'socket.io-client' // ⬅️ Import WebSocket
 import api from '../../services/api'
-
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
@@ -19,9 +19,12 @@ function Home() {
   const inputName = useRef()
   const inputMenssage = useRef()
   const scrollRef = useRef()
+  const socketRef = useRef(null)
+
+  const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
   async function getUsers() {
-    const res = await axios.get('https://api-papo-reto.onrender.com/usuarios')
+    const res = await axios.get(`${BACKEND_URL}/usuarios`)
     setUsers(res.data)
   }
 
@@ -31,9 +34,9 @@ function Home() {
 
     if (name && menssage) {
       try {
-        await axios.post('https://api-papo-reto.onrender.com/usuarios', {
-          name: name,
-          menssage: menssage
+        await axios.post(`${BACKEND_URL}/usuarios`, {
+          name,
+          menssage
         });
       } catch (error) {
         console.error("Erro ao criar usuário:", error);
@@ -44,12 +47,10 @@ function Home() {
 
     inputMenssage.current.value = ''
     getUsers()
-
   }
 
-
   async function deleteUsers(id) {
-    await axios.delete(`https://api-papo-reto.onrender.com/usuarios/${id}`)
+    await axios.delete(`${BACKEND_URL}/usuarios/${id}`)
     getUsers()
   }
 
@@ -60,13 +61,32 @@ function Home() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
       })
-      await axios.post('https://api-papo-reto.onrender.com/subscribe', subscription)
+      await axios.post(`${BACKEND_URL}/subscribe`, subscription)
     }
   }
 
   useEffect(() => {
     getUsers()
     subscribeToPush()
+
+    // Inicia conexão WebSocket
+    socketRef.current = io(BACKEND_URL)
+
+    // 🔐 Registra o "usuário logado" no WebSocket (simplesmente usando o nome)
+    socketRef.current.on('connect', () => {
+      const nome = inputName.current?.value || 'visitante'
+      socketRef.current.emit('register', nome)
+    })
+
+    // 📥 Recebe nova mensagem em tempo real
+    socketRef.current.on('nova_mensagem', msg => {
+      alert(`Nova mensagem de ${msg.name}: ${msg.menssage}`)
+      getUsers()
+    })
+
+    return () => {
+      socketRef.current?.disconnect()
+    }
   }, [])
 
   useEffect(() => {
