@@ -2,8 +2,9 @@ import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import './style.css'
 import Refresh from '../../assets/refresh.svg'
-import { io } from 'socket.io-client' // ⬅️ Import WebSocket
-import api from '../../services/api'
+import { io } from 'socket.io-client'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
@@ -29,20 +30,20 @@ function Home() {
   }
 
   async function createUsers() {
-    const name = inputName.current.value.trim();
-    const menssage = inputMenssage.current.value.trim();
+    const name = inputName.current.value.trim()
+    const menssage = inputMenssage.current.value.trim()
 
     if (name && menssage) {
       try {
         await axios.post(`${BACKEND_URL}/usuarios`, {
           name,
           menssage
-        });
+        })
       } catch (error) {
-        console.error("Erro ao criar usuário:", error);
+        console.error('Erro ao criar usuário:', error)
       }
     } else {
-      alert("Preencha todos os campos antes de enviar.");
+      toast.warning('Preencha todos os campos antes de enviar.')
     }
 
     inputMenssage.current.value = ''
@@ -69,18 +70,16 @@ function Home() {
     getUsers()
     subscribeToPush()
 
-    // Inicia conexão WebSocket
+    // Conexão WebSocket
     socketRef.current = io(BACKEND_URL)
 
-    // 🔐 Registra o "usuário logado" no WebSocket (simplesmente usando o nome)
     socketRef.current.on('connect', () => {
       const nome = inputName.current?.value || 'visitante'
       socketRef.current.emit('register', nome)
     })
 
-    // 📥 Recebe nova mensagem em tempo real
     socketRef.current.on('nova_mensagem', msg => {
-      alert(`Nova mensagem de ${msg.name}: ${msg.menssage}`)
+      toast.info(`💬 Nova mensagem de ${msg.name}: ${msg.menssage}`)
       getUsers()
     })
 
@@ -120,8 +119,10 @@ function Home() {
         <img src={Refresh} alt='Recarregar' />
       </button>
 
+      <ToastContainer position='top-center' autoClose={4000} />
     </div>
   )
 }
 
 export default Home
+
