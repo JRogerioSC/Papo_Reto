@@ -9,7 +9,6 @@ import { register } from './serviceWorkerRegistration'
 
 register()
 
-
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
 function urlBase64ToUint8Array(base64String) {
@@ -44,8 +43,25 @@ function Home() {
           name,
           menssage
         })
+
+        // ✅ Notificação estilosa
+        toast.success('📨 Mensagem enviada com sucesso!', {
+          position: 'top-center',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: 'colored'
+        })
+
       } catch (error) {
         console.error('Erro ao criar usuário:', error)
+        toast.error('❌ Erro ao enviar mensagem.', {
+          position: 'top-center',
+          autoClose: 3000,
+          theme: 'colored'
+        })
       }
 
       inputMenssage.current.value = ''
@@ -83,7 +99,7 @@ function Home() {
     getUsers()
     subscribeToPush()
 
-    const interval = setInterval(getUsers, 3000) // Atualiza a cada 3s
+    const interval = setInterval(getUsers, 3000)
     return () => clearInterval(interval)
   }, [])
 
@@ -93,6 +109,8 @@ function Home() {
 
   return (
     <div className='container'>
+      <ToastContainer /> {/* ✅ renderiza os toasts */}
+
       <h1>Papo_Reto</h1>
 
       {users.map(user => (
@@ -113,10 +131,8 @@ function Home() {
       </form>
 
       <button className='enviar' onClick={createUsers}>ENVIAR</button>
-
     </div>
   )
 }
 
 export default Home
-
