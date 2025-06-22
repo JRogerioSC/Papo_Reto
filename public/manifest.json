@@ -1,0 +1,20 @@
+{
+  "short_name": "Papo_Reto",
+  "name": "Papo Reto - Bate-papo em tempo real",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#161616"
+}

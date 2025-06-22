@@ -5,6 +5,10 @@ import Refresh from '../../assets/refresh.svg'
 import { io } from 'socket.io-client'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { register } from './serviceWorkerRegistration'
+
+register()
+
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 const ICON_URL = 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png'
@@ -132,6 +136,7 @@ function Home() {
       <ToastContainer />
     </div>
   )
+
 }
 
 export default Home
