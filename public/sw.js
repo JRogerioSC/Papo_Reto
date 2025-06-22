@@ -1,41 +1,41 @@
-// service-worker.js
-
-self.addEventListener('push', function(event) {
-  let data = { title: 'Nova Menssagem!', body: '', icon: 'https://cdn-icons-png.flaticon.com/512/484/484662.png', data: {} };
+self.addEventListener('push', function (event) {
+  let data = {}
 
   if (event.data) {
-    data = JSON.parse(event.data.text());
+    data = event.data.json()
   }
 
+  const title = data.title || 'Nova notificação'
   const options = {
-    body: data.body,
-    icon: data.icon || 'https://cdn-icons-png.flaticon.com/512/484/484662.png', // Ícone padrão, se não enviado
+    body: data.body || 'Você recebeu uma nova mensagem!',
+    icon: data.icon || 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png',
+    badge: data.badge || 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png',
     data: {
-      url: data.data?.url || 'https://pap0reto.netlify.app/' // URL para abrir ao clicar
+      url: data.data?.url || 'https://pap0reto.netlify.app'
     }
-  };
+  }
 
   event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
-});
+    self.registration.showNotification(title, options)
+  )
+})
 
-self.addEventListener('notificationclick', function(event) {
-  event.notification.close();
-
-  const urlToOpen = event.notification.data?.url || 'https://cdn-icons-png.flaticon.com/512/484/484662.png';
+// Quando o usuário clicar na notificação
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close()
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
+    clients.matchAll({ type: 'window' }).then(windowClients => {
+      for (let client of windowClients) {
+        if (client.url === event.notification.data.url && 'focus' in client) {
+          return client.focus()
         }
       }
+
       if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
+        return clients.openWindow(event.notification.data.url)
       }
     })
-  );
-});
+  )
+})
 
