@@ -8,14 +8,10 @@
   "gcm_sender_id": "103953800507",
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512.png",
+      "src": "https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

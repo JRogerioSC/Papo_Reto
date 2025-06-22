@@ -1,0 +1,17 @@
+{
+  "name": "Papo_Reto",
+  "packageId": "net.pap0reto.chat",
+  "host": "pap0reto.netlify.app",
+  "startUrl": "/",
+  "display": "standalone",
+  "themeColor": "#000000",
+  "navigationColor": "#000000",
+  "backgroundColor": "#ffffff",
+  "enableNotifications": true,
+  "signingKey": {
+    "path": "./my-release-key.jks",
+    "alias": "my-key-alias",
+    "password": "your-key-password",
+    "keystorePassword": "your-keystore-password"
+  }
+}
