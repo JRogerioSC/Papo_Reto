@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import './style.css'
-import api from '../../services/api'
+import Refresh from '../../assets/refresh.svg'
 import { io } from 'socket.io-client'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -10,6 +10,7 @@ import { register } from './serviceWorkerRegistration'
 register()
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
+const ICON_URL = 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png'
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
@@ -23,13 +24,16 @@ function Home() {
   const inputName = useRef()
   const inputMenssage = useRef()
   const scrollRef = useRef()
+  const socketRef = useRef(null)
+
+  const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
   async function getUsers() {
     try {
-      const res = await axios.get('https://api-papo-reto.onrender.com/usuarios')
+      const res = await axios.get(`${BACKEND_URL}/usuarios`)
       setUsers(res.data)
-    } catch (error) {
-      console.error('Erro ao buscar mensagens:', error)
+    } catch (err) {
+      console.error('Erro ao buscar mensagens:', err)
     }
   }
 
@@ -39,19 +43,11 @@ function Home() {
 
     if (name && menssage) {
       try {
-        await axios.post('https://api-papo-reto.onrender.com/usuarios', {
-          name,
-          menssage
-        })
+        await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
 
-        // ✅ Notificação estilosa
         toast.success('📨 Mensagem enviada com sucesso!', {
           position: 'top-center',
           autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
           theme: 'colored'
         })
 
@@ -67,16 +63,19 @@ function Home() {
       inputMenssage.current.value = ''
       getUsers()
     } else {
-      alert('Preencha todos os campos antes de enviar.')
+      toast.warning('⚠️ Preencha todos os campos antes de enviar.', {
+        position: 'top-center',
+        autoClose: 3000
+      })
     }
   }
 
   async function deleteUsers(id) {
     try {
-      await axios.delete(`https://api-papo-reto.onrender.com/usuarios/${id}`)
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`)
       getUsers()
-    } catch (error) {
-      console.error('Erro ao deletar mensagem:', error)
+    } catch (err) {
+      console.error('Erro ao deletar mensagem:', err)
     }
   }
 
@@ -88,9 +87,9 @@ function Home() {
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
         })
-        await axios.post('https://api-papo-reto.onrender.com/subscribe', subscription)
+        await axios.post(`${BACKEND_URL}/subscribe`, subscription)
       } catch (error) {
-        console.error('Erro ao se inscrever para notificações:', error)
+        console.error('Erro ao inscrever para push:', error)
       }
     }
   }
@@ -99,8 +98,37 @@ function Home() {
     getUsers()
     subscribeToPush()
 
-    const interval = setInterval(getUsers, 3000)
-    return () => clearInterval(interval)
+    socketRef.current = io(BACKEND_URL)
+
+    socketRef.current.on('connect', () => {
+      const nome = inputName.current?.value || 'visitante'
+      socketRef.current.emit('register', nome)
+    })
+
+    socketRef.current.on('nova_mensagem', msg => {
+      toast.info(`💬 ${msg.name}: ${msg.menssage}`, {
+        icon: () => (
+          <img
+            src={ICON_URL}
+            alt="Icon"
+            style={{ width: 24, height: 24, borderRadius: 4 }}
+          />
+        ),
+        autoClose: 4000,
+        position: 'top-center'
+      })
+      getUsers()
+    })
+
+    // Atualização automática a cada 3 segundos
+    const interval = setInterval(() => {
+      getUsers()
+    }, 3000)
+
+    return () => {
+      socketRef.current?.disconnect()
+      clearInterval(interval)
+    }
   }, [])
 
   useEffect(() => {
@@ -109,8 +137,7 @@ function Home() {
 
   return (
     <div className='container'>
-      <ToastContainer /> {/* ✅ renderiza os toasts */}
-
+      <ToastContainer />
       <h1>Papo_Reto</h1>
 
       {users.map(user => (
@@ -131,6 +158,10 @@ function Home() {
       </form>
 
       <button className='enviar' onClick={createUsers}>ENVIAR</button>
+
+      <button className='refresh' onClick={getUsers}>
+        <img src={Refresh} alt='Recarregar' />
+      </button>
     </div>
   )
 }
