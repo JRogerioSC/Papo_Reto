@@ -1,0 +1,21 @@
+{
+  "packageId": "com.devclub.paporeto",
+  "host": "https://pap0reto.netlify.app",
+  "name": "Papo Reto",
+  "launcherName": "Papo_Reto",
+  "display": "standalone",
+  "themeColor": "#ffffff",
+  "backgroundColor": "#ffffff",
+  "navigationColor": "#ffffff",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#ffffff",
+  "orientation": "portrait",
+  "appVersion": "1.0.0",
+  "fallbackType": "customtabs",
+  "signing": {
+    "keystorePath": "C:\\Users\\User\\Desktop\\projetos_criados_DevClub\\Papo_Reto\\android.keystore",
+    "keystoreAlias": "android",
+    "keystorePassword": "689033rogerio",
+    "keyPassword": "689033rogerio"
+  }
+}

@@ -18,11 +18,11 @@
   "monochromeIconUrl": "https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "C:\\Users\\User\\Desktop\\projetos criados DevClub\\Papo_Reto\\android.keystore",
+    "path": "C:\\Users\\User\\Desktop\\projetos_criados_DevClub\\Papo_Reto\\android.keystore",
     "alias": "android"
   },
-  "appVersionName": "2",
-  "appVersionCode": 2,
+  "appVersionName": "4",
+  "appVersionCode": 4,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://pap0reto.netlify.app/manifest.json",
@@ -43,5 +43,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "2"
+  "appVersion": "4"
 }
