@@ -3792,6 +3792,25 @@
             "outputFile": "app.netlify.pap0reto.twa.app-release-25:/values_values.arsc.flat",
             "map": [
                 {
+                    "source": "C:\\Users\\User\\Desktop\\projetos_criados_DevClub\\Papo_Reto\\app\\src\\main\\res\\values\\strings.xml",
+                    "from": {
+                        "startLines": "25",
+                        "startColumns": "2",
+                        "startOffsets": "986",
+                        "endLines": "34",
+                        "endColumns": "11",
+                        "endOffsets": "1244"
+                    },
+                    "to": {
+                        "startLines": "318",
+                        "startColumns": "4",
+                        "startOffsets": "20538",
+                        "endLines": "327",
+                        "endColumns": "11",
+                        "endOffsets": "20796"
+                    }
+                },
+                {
                     "source": "C:\\Users\\User\\.gradle\\caches\\8.11.1\\transforms\\be57bd43967b699c12a0f6b8bd2f21c6\\transformed\\browser-1.9.0-alpha04\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11",
@@ -3860,23 +3879,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\User\\Desktop\\projetos criados DevClub\\Papo_Reto\\app\\src\\main\\res\\values\\colors.xml",
-                    "from": {
-                        "startLines": "16",
-                        "startColumns": "4",
-                        "startOffsets": "647",
-                        "endColumns": "53",
-                        "endOffsets": "696"
-                    },
-                    "to": {
-                        "startLines": "83",
-                        "startColumns": "4",
-                        "startOffsets": "5431",
-                        "endColumns": "53",
-                        "endOffsets": "5480"
-                    }
-                },
-                {
                     "source": "C:\\Users\\User\\.gradle\\caches\\8.11.1\\transforms\\39199f8ba8b037a40395507dbae61e10\\transformed\\lifecycle-runtime-2.6.2\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2",
@@ -3913,6 +3915,23 @@
                     }
                 },
                 {
+                    "source": "C:\\Users\\User\\Desktop\\projetos_criados_DevClub\\Papo_Reto\\app\\src\\main\\res\\values\\colors.xml",
+                    "from": {
+                        "startLines": "16",
+                        "startColumns": "4",
+                        "startOffsets": "647",
+                        "endColumns": "53",
+                        "endOffsets": "696"
+                    },
+                    "to": {
+                        "startLines": "83",
+                        "startColumns": "4",
+                        "startOffsets": "5431",
+                        "endColumns": "53",
+                        "endOffsets": "5480"
+                    }
+                },
+                {
                     "source": "C:\\Users\\User\\.gradle\\caches\\8.11.1\\transforms\\48bafeae36779f423d74bd8112b18853\\transformed\\fragment-1.5.4\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,3,4,5,10",
@@ -3946,25 +3965,6 @@
                         "startOffsets": "16772,17859",
                         "endColumns": "41,59",
                         "endOffsets": "16809,17914"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\User\\Desktop\\projetos criados DevClub\\Papo_Reto\\app\\src\\main\\res\\values\\strings.xml",
-                    "from": {
-                        "startLines": "25",
-                        "startColumns": "2",
-                        "startOffsets": "986",
-                        "endLines": "34",
-                        "endColumns": "11",
-                        "endOffsets": "1244"
-                    },
-                    "to": {
-                        "startLines": "318",
-                        "startColumns": "4",
-                        "startOffsets": "20538",
-                        "endLines": "327",
-                        "endColumns": "11",
-                        "endOffsets": "20796"
                     }
                 },
                 {
@@ -4006,23 +4006,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\User\\Desktop\\projetos criados DevClub\\Papo_Reto\\app\\build\\generated\\res\\resValues\\release\\values\\gradleResValues.xml",
-                    "from": {
-                        "startLines": "6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "159,249,347,439,528,621,713,809,908,1011,1115,1224,1339,1473,1592,1714,1846,1960,2072,2219",
-                        "endColumns": "47,55,49,46,50,49,53,56,60,61,66,72,91,76,79,89,71,69,104,106",
-                        "endOffsets": "202,300,392,481,574,666,762,861,964,1068,1177,1292,1426,1545,1667,1799,1913,2025,2172,2321"
-                    },
-                    "to": {
-                        "startLines": "9,10,20,39,40,63,64,65,66,286,316,336,340,341,342,343,344,348,349,353",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "472,520,1237,2627,2674,4078,4128,4182,4239,18330,20411,21380,21668,21760,21837,21917,22007,22352,22422,22743",
-                        "endColumns": "47,55,49,46,50,49,53,56,60,61,66,72,91,76,79,89,71,69,104,106",
-                        "endOffsets": "515,571,1282,2669,2720,4123,4177,4234,4295,18387,20473,21448,21755,21832,21912,22002,22074,22417,22522,22845"
-                    }
-                },
-                {
                     "source": "C:\\Users\\User\\.gradle\\caches\\8.11.1\\transforms\\2d883c2f9b398e3ed01a138584927eec\\transformed\\savedstate-1.2.1\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2",
@@ -4037,6 +4020,23 @@
                         "startOffsets": "17919",
                         "endColumns": "53",
                         "endOffsets": "17968"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\User\\Desktop\\projetos_criados_DevClub\\Papo_Reto\\app\\build\\generated\\res\\resValues\\release\\values\\gradleResValues.xml",
+                    "from": {
+                        "startLines": "6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "159,249,347,439,528,621,713,809,908,1011,1115,1224,1339,1473,1592,1714,1846,1960,2072,2219",
+                        "endColumns": "47,55,49,46,50,49,53,56,60,61,66,72,91,76,79,89,71,69,104,106",
+                        "endOffsets": "202,300,392,481,574,666,762,861,964,1068,1177,1292,1426,1545,1667,1799,1913,2025,2172,2321"
+                    },
+                    "to": {
+                        "startLines": "9,10,20,39,40,63,64,65,66,286,316,336,340,341,342,343,344,348,349,353",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "472,520,1237,2627,2674,4078,4128,4182,4239,18330,20411,21380,21668,21760,21837,21917,22007,22352,22422,22743",
+                        "endColumns": "47,55,49,46,50,49,53,56,60,61,66,72,91,76,79,89,71,69,104,106",
+                        "endOffsets": "515,571,1282,2669,2720,4123,4177,4234,4295,18387,20473,21448,21755,21832,21912,22002,22074,22417,22522,22845"
                     }
                 }
             ]

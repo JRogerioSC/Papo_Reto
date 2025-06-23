@@ -1,4 +1,4 @@
-# The proguard configuration file for the following section is C:\Users\User\Desktop\projetos criados DevClub\Papo_Reto\app\build\intermediates\aapt_proguard_file\release\processReleaseResources\aapt_rules.txt
+# The proguard configuration file for the following section is C:\Users\User\Desktop\projetos_criados_DevClub\Papo_Reto\app\build\intermediates\aapt_proguard_file\release\processReleaseResources\aapt_rules.txt
 -keep class androidx.core.app.CoreComponentFactory { <init>(); }
 -keep class androidx.core.content.FileProvider { <init>(); }
 -keep class androidx.profileinstaller.ProfileInstallReceiver { <init>(); }
@@ -53,8 +53,8 @@
 -keep class androidx.core.widget.NestedScrollView { <init>(android.content.Context, android.util.AttributeSet); }
 
 
-# End of content from C:\Users\User\Desktop\projetos criados DevClub\Papo_Reto\app\build\intermediates\aapt_proguard_file\release\processReleaseResources\aapt_rules.txt
-# The proguard configuration file for the following section is C:\Users\User\Desktop\projetos criados DevClub\Papo_Reto\app\build\intermediates\default_proguard_files\global\proguard-android.txt-8.9.1
+# End of content from C:\Users\User\Desktop\projetos_criados_DevClub\Papo_Reto\app\build\intermediates\aapt_proguard_file\release\processReleaseResources\aapt_rules.txt
+# The proguard configuration file for the following section is C:\Users\User\Desktop\projetos_criados_DevClub\Papo_Reto\app\build\intermediates\default_proguard_files\global\proguard-android.txt-8.9.1
 # This is a configuration file for ProGuard.
 # http://proguard.sourceforge.net/index.html#manual/usage.html
 #
@@ -151,7 +151,7 @@
 # These classes are duplicated between android.jar and core-lambda-stubs.jar.
 -dontnote java.lang.invoke.**
 
-# End of content from C:\Users\User\Desktop\projetos criados DevClub\Papo_Reto\app\build\intermediates\default_proguard_files\global\proguard-android.txt-8.9.1
+# End of content from C:\Users\User\Desktop\projetos_criados_DevClub\Papo_Reto\app\build\intermediates\default_proguard_files\global\proguard-android.txt-8.9.1
 # The proguard configuration file for the following section is C:\Users\User\.gradle\caches\8.11.1\transforms\183ebbc8ed821348f80a6d36d20b75e3\transformed\appcompat-1.7.0\proguard.txt
 # Copyright (C) 2018 The Android Open Source Project
 #
