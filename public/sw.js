@@ -5,8 +5,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'Nova Mensagem!'
   const options = {
     // Remove o body ou deixa uma mensagem curta
-    body: '', // para só aparecer o título, pode deixar vazio
-    icon: data.icon || '/icon.png', // seu ícone do app
+    body: 'Você recebeu uma nova mensagem', // para só aparecer o título, pode deixar vazio
+    icon: data.icon || 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png', // seu ícone do app
     badge: data.icon || 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png', // opcional: ícone pequeno na barra de status
     data: {
       url: data.data?.url || '/'  // URL para abrir no clique
