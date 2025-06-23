@@ -7,7 +7,7 @@ self.addEventListener('push', event => {
     // Remove o body ou deixa uma mensagem curta
     body: 'Você recebeu uma nova mensagem', // para só aparecer o título, pode deixar vazio
     icon: data.icon || 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png', // seu ícone do app
-    badge: data.icon || 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png', // opcional: ícone pequeno na barra de status
+    badge: data.icon || 'https://i.postimg.cc/W3sDHcch/Chat-GPT-Image-23-de-jun-de-2025-19-21-02.png', // opcional: ícone pequeno na barra de status
     data: {
       url: data.data?.url || '/'  // URL para abrir no clique
     },
