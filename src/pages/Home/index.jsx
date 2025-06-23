@@ -9,7 +9,7 @@ import { register } from './serviceWorkerRegistration'
 register()
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
-const ICON_URL = 'https://i.postimg.cc/W4pSFmV5/icon-Papo-Reto.png'
+const ICON_URL = 'https://i.postimg.cc/W3sDHcch/Chat-GPT-Image-23-de-jun-de-2025-19-21-02.png'
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
