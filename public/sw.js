@@ -6,8 +6,8 @@ self.addEventListener('push', event => {
   const options = {
     // Remove o body ou deixa uma mensagem curta
     body: 'Você recebeu uma nova mensagem', // para só aparecer o título, pode deixar vazio
-    icon: data.icon || 'https://i.postimg.cc/k499mWs5/Chat-GPT-Image-23-de-jun-de-2025-21-00-52.png', // seu ícone do app
-    badge: data.icon || 'https://i.postimg.cc/k499mWs5/Chat-GPT-Image-23-de-jun-de-2025-21-00-52.png', // opcional: ícone pequeno na barra de status
+    icon: data.icon || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg', // seu ícone do app
+    badge: data.icon || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg', // opcional: ícone pequeno na barra de status
     data: {
       url: data.data?.url || '/'  // URL para abrir no clique
     },
