@@ -1,18 +1,14 @@
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {}
 
-  // Mostra só o título "Nova Mensagem!" e ícone, sem body, para simplificar
   const title = data.title || 'Nova Mensagem!'
   const options = {
-    // Remove o body ou deixa uma mensagem curta
-    body: 'Você recebeu uma nova mensagem', // para só aparecer o título, pode deixar vazio
-    icon: data.icon || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg', // seu ícone do app
-    badge: data.icon || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg', // opcional: ícone pequeno na barra de status
+    body: data.body || 'Você recebeu uma nova mensagem',
+    icon: data.icon || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg',
+    badge: data.badge || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg',
     data: {
-      url: data.data?.url || '/'  // URL para abrir no clique
-    },
-    // Evita som ou vibração se quiser (opcional)
-    // silent: true,
+      url: data.data?.url || '/'
+    }
   }
 
   event.waitUntil(
@@ -35,4 +31,3 @@ self.addEventListener('notificationclick', event => {
     })
   )
 })
-
