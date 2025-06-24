@@ -123,7 +123,7 @@ function Home() {
 
     const interval = setInterval(() => {
       getUsers()
-    }, 3000)
+    }, 2000)
 
     return () => {
       socketRef.current?.disconnect()

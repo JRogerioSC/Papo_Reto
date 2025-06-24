@@ -3,13 +3,13 @@
   "short_name": "Papo_Reto",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "https://i.postimg.cc/6pfxh8tJ/512x512.jpg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpg",
       "purpose": "maskable"
     }
   ]

@@ -1,9 +1,9 @@
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {}
 
-  const title = data.title || 'Nova Mensagem!'
+  const title = data.title || 'Nova Menssagem!'
   const options = {
-    body: data.body || 'Você recebeu uma nova mensagem',
+    body: data.body || 'Você recebeu uma nova menssagem',
     icon: data.icon || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg',
     badge: data.badge || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg',
     data: {
