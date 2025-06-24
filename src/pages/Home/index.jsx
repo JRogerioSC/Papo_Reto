@@ -114,12 +114,13 @@ function Home() {
           />
         ),
         autoClose: 4000,
-        position: 'top-center'
+        position: 'top-center',
+        theme: 'light'
       })
+
       getUsers()
     })
 
-    // Atualização automática a cada 3 segundos
     const interval = setInterval(() => {
       getUsers()
     }, 3000)
@@ -157,7 +158,6 @@ function Home() {
       </form>
 
       <button className='enviar' onClick={createUsers}>ENVIAR</button>
-
     </div>
   )
 }
