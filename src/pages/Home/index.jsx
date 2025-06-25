@@ -173,7 +173,7 @@ function Home() {
           <input
             className='nome'
             ref={inputName}
-            placeholder='Digite seu nome para cadastrar'
+            placeholder='Digite seu nome'
             maxLength={20}
           />
           <button className='cadastrar' onClick={cadastrarNome}>CADASTRAR NOME</button>
