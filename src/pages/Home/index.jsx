@@ -10,6 +10,7 @@ register()
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 const ICON_URL = 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg'
+const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
@@ -27,8 +28,6 @@ function Home() {
   const scrollRef = useRef()
   const socketRef = useRef(null)
 
-  const BACKEND_URL = 'https://api-papo-reto.onrender.com'
-
   async function getUsers() {
     try {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
@@ -40,32 +39,44 @@ function Home() {
 
   async function cadastrarNome() {
     const nome = inputName.current.value.trim()
-    if (!nome) return toast.warning('⚠️ Digite um nome válido.', { autoClose: 3000, position: 'top-center' })
+    if (!nome) {
+      toast.warning('⚠️ Digite um nome válido para cadastro.', { autoClose: 3000, position: 'top-center' })
+      return
+    }
 
     try {
       await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
-      toast.success(`✅ Nome "${nome}" cadastrado!`, { autoClose: 2000, position: 'top-center' })
+      toast.success(`✅ Nome "${nome}" cadastrado com sucesso!`, { autoClose: 2000, position: 'top-center' })
       localStorage.setItem('username', nome)
       setName(nome)
       setCadastrado(true)
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro no cadastro.', { autoClose: 3000, position: 'top-center' })
+      const msg = err.response?.data?.error || 'Erro no cadastro do nome.'
+      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center' })
     }
   }
 
   async function enviarMensagem() {
     const menssage = inputMenssage.current.value.trim()
-    if (!name) return toast.warning('⚠️ Cadastre seu nome antes.', { autoClose: 3000, position: 'top-center' })
-    if (!menssage) return toast.warning('⚠️ Escreva uma mensagem.', { autoClose: 3000, position: 'top-center' })
+    if (!name) {
+      toast.warning('⚠️ Cadastre seu nome antes de enviar mensagens.', { autoClose: 3000, position: 'top-center' })
+      return
+    }
+    if (!menssage) {
+      toast.warning('⚠️ Digite uma mensagem.', { autoClose: 3000, position: 'top-center' })
+      return
+    }
 
     try {
       await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
-      toast.success('📨 Mensagem enviada!', { autoClose: 2000, position: 'top-center' })
+      toast.success('📨 Mensagem enviada com sucesso!', { autoClose: 2000, position: 'top-center', theme: 'colored' })
       inputMenssage.current.value = ''
-      getUsers()
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao enviar.', { autoClose: 3000, position: 'top-center' })
+      const msg = err.response?.data?.error || 'Erro ao enviar mensagem.'
+      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center', theme: 'colored' })
     }
+
+    getUsers()
   }
 
   function trocarNome() {
@@ -76,10 +87,11 @@ function Home() {
 
   async function deleteUsers(id) {
     try {
-      await axios.delete(`${BACKEND_URL}/usuarios/${id}`)
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
       getUsers()
     } catch (err) {
-      console.error('Erro ao deletar mensagem:', err)
+      const msg = err.response?.data?.error || 'Erro ao deletar.'
+      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center' })
     }
   }
 
@@ -103,13 +115,20 @@ function Home() {
     subscribeToPush()
 
     socketRef.current = io(BACKEND_URL)
+
     socketRef.current.on('connect', () => {
-      socketRef.current.emit('register', localStorage.getItem('username') || 'visitante')
+      const nome = localStorage.getItem('username') || 'visitante'
+      socketRef.current.emit('register', nome)
     })
+
     socketRef.current.on('nova_mensagem', msg => {
       toast.info(`💬 ${msg.name}: ${msg.menssage}`, {
         icon: () => (
-          <img src={ICON_URL} alt="Icon" style={{ width: 24, height: 24, borderRadius: 4 }} />
+          <img
+            src={ICON_URL}
+            alt="Icon"
+            style={{ width: 24, height: 24, borderRadius: 4 }}
+          />
         ),
         autoClose: 4000,
         position: 'top-center',
@@ -119,6 +138,7 @@ function Home() {
     })
 
     const interval = setInterval(getUsers, 2000)
+
     return () => {
       socketRef.current?.disconnect()
       clearInterval(interval)
@@ -140,7 +160,9 @@ function Home() {
             <span><p># {user.name} # :</p></span>
             <span>{user.menssage}</span>
           </div>
-          <button onClick={() => deleteUsers(user.id)}>🗑</button>
+          {user.name.toLowerCase() === name.toLowerCase() && (
+            <button onClick={() => deleteUsers(user.id)}>🗑</button>
+          )}
         </div>
       ))}
 
@@ -148,14 +170,24 @@ function Home() {
 
       {!cadastrado ? (
         <>
-          <input className='nome' ref={inputName} placeholder='Digite seu nome' maxLength={20} />
+          <input
+            className='nome'
+            ref={inputName}
+            placeholder='Digite seu nome para cadastrar'
+            maxLength={20}
+          />
           <button className='cadastrar' onClick={cadastrarNome}>CADASTRAR NOME</button>
         </>
       ) : (
         <>
           <p>Nome fixado: <strong>{name}</strong></p>
           <button className='trocar-nome' onClick={trocarNome}>Trocar nome</button>
-          <input className='menssage' ref={inputMenssage} placeholder='Digite sua mensagem' maxLength={200} />
+          <input
+            className='menssage'
+            ref={inputMenssage}
+            placeholder='Digite sua mensagem'
+            maxLength={200}
+          />
           <button className='enviar' onClick={enviarMensagem}>ENVIAR</button>
         </>
       )}
@@ -164,3 +196,4 @@ function Home() {
 }
 
 export default Home
+
