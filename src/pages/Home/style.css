@@ -94,4 +94,15 @@ form {
     opacity: 0.5;
   }
 
+  .trocar-nome {
+    margin-top: 10px;
+    background: #f44;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+
 }

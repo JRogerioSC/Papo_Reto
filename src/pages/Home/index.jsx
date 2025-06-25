@@ -20,6 +20,7 @@ function urlBase64ToUint8Array(base64String) {
 
 function Home() {
   const [users, setUsers] = useState([])
+  const [name, setName] = useState(localStorage.getItem('username') || '')
   const inputName = useRef()
   const inputMenssage = useRef()
   const scrollRef = useRef()
@@ -37,36 +38,47 @@ function Home() {
   }
 
   async function createUsers() {
-    const name = inputName.current.value.trim()
-    const menssage = inputMenssage.current.value.trim()
+    const fixedName = name || inputName.current?.value.trim()
+    const menssage = inputMenssage.current?.value.trim()
 
-    if (name && menssage) {
-      try {
-        await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
+    if (!fixedName || !menssage) {
+      return toast.warning('⚠️ Preencha todos os campos.', {
+        autoClose: 3000,
+        position: 'top-center'
+      })
+    }
 
-        toast.success('📨 Mensagem enviada com sucesso!', {
-          position: 'top-center',
-          autoClose: 3000,
-          theme: 'colored'
-        })
+    try {
+      const res = await axios.post(`${BACKEND_URL}/usuarios`, {
+        name: fixedName,
+        menssage
+      })
 
-      } catch (error) {
-        console.error('Erro ao criar usuário:', error)
-        toast.error('❌ Erro ao enviar mensagem.', {
-          position: 'top-center',
-          autoClose: 3000,
-          theme: 'colored'
-        })
+      if (!name) {
+        localStorage.setItem('username', fixedName)
+        setName(fixedName)
       }
 
       inputMenssage.current.value = ''
-      getUsers()
-    } else {
-      toast.warning('⚠️ Preencha todos os campos antes de enviar.', {
+
+      toast.success('📨 Mensagem enviada com sucesso!', {
         position: 'top-center',
-        autoClose: 3000
+        autoClose: 2000,
+        theme: 'colored'
+      })
+    } catch (error) {
+      const msg = error.response?.data?.error || 'Erro ao enviar mensagem.'
+      toast.error(`❌ ${msg}`, {
+        position: 'top-center',
+        autoClose: 3000,
+        theme: 'colored'
       })
     }
+  }
+
+  function trocarNome() {
+    localStorage.removeItem('username')
+    setName('')
   }
 
   async function deleteUsers(id) {
@@ -100,7 +112,7 @@ function Home() {
     socketRef.current = io(BACKEND_URL)
 
     socketRef.current.on('connect', () => {
-      const nome = inputName.current?.value || 'visitante'
+      const nome = localStorage.getItem('username') || 'visitante'
       socketRef.current.emit('register', nome)
     })
 
@@ -121,9 +133,7 @@ function Home() {
       getUsers()
     })
 
-    const interval = setInterval(() => {
-      getUsers()
-    }, 2000)
+    const interval = setInterval(getUsers, 2000)
 
     return () => {
       socketRef.current?.disconnect()
@@ -153,11 +163,29 @@ function Home() {
       <div ref={scrollRef}></div>
 
       <form>
-        <input className='nome' ref={inputName} placeholder='Nome' />
-        <input className='menssage' ref={inputMenssage} placeholder='Mensagem' />
+        {!name && (
+          <input
+            className='nome'
+            ref={inputName}
+            placeholder='Digite seu nome'
+            maxLength={20}
+          />
+        )}
+        <input
+          className='menssage'
+          ref={inputMenssage}
+          placeholder='Mensagem'
+          maxLength={200}
+        />
       </form>
 
       <button className='enviar' onClick={createUsers}>ENVIAR</button>
+
+      {name && (
+        <button className='trocar-nome' onClick={trocarNome}>
+          Trocar nome ({name})
+        </button>
+      )}
     </div>
   )
 }
