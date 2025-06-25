@@ -27,48 +27,6 @@ function Home() {
 
   const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
-  // 📲 Autenticação por celular
-  const [celular, setCelular] = useState('')
-  const [codigo, setCodigo] = useState('')
-  const [codigoEnviado, setCodigoEnviado] = useState(false)
-  const [verificado, setVerificado] = useState(false)
-
-  async function enviarCodigoSMS() {
-    if (!celular) {
-      toast.warn('📱 Informe o número de celular')
-      return
-    }
-
-    try {
-      await axios.post(`${BACKEND_URL}/auth/send-code`, { celular })
-      setCodigoEnviado(true)
-      toast.success('✅ Código enviado via SMS!')
-    } catch (err) {
-      console.error(err)
-      toast.error('❌ Erro ao enviar código')
-    }
-  }
-
-  async function verificarCodigo() {
-    if (!celular || !codigo) {
-      toast.warn('Digite o número e o código')
-      return
-    }
-
-    try {
-      const res = await axios.post(`${BACKEND_URL}/auth/verify-code`, { celular, codigo })
-      if (res.data.success) {
-        setVerificado(true)
-        toast.success('📲 Celular verificado com sucesso!')
-      } else {
-        toast.error('❌ Código incorreto')
-      }
-    } catch (err) {
-      console.error(err)
-      toast.error('❌ Erro ao verificar código')
-    }
-  }
-
   async function getUsers() {
     try {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
@@ -82,19 +40,16 @@ function Home() {
     const name = inputName.current.value.trim()
     const menssage = inputMenssage.current.value.trim()
 
-    if (!verificado) {
-      toast.warning('📲 Verifique seu número antes de enviar mensagem.')
-      return
-    }
-
     if (name && menssage) {
       try {
         await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
+
         toast.success('📨 Mensagem enviada com sucesso!', {
           position: 'top-center',
           autoClose: 3000,
           theme: 'colored'
         })
+
       } catch (error) {
         console.error('Erro ao criar usuário:', error)
         toast.error('❌ Erro ao enviar mensagem.', {
@@ -185,53 +140,24 @@ function Home() {
       <ToastContainer />
       <h1>Papo_Reto</h1>
 
-      {/* AUTENTICAÇÃO */}
-      {!verificado && (
-        <div className="auth">
-          <input
-            type="tel"
-            placeholder="Número de celular com DDD"
-            value={celular}
-            onChange={e => setCelular(e.target.value)}
-          />
-          {codigoEnviado && (
-            <input
-              type="text"
-              placeholder="Código recebido"
-              value={codigo}
-              onChange={e => setCodigo(e.target.value)}
-            />
-          )}
-          {!codigoEnviado ? (
-            <button onClick={enviarCodigoSMS}>Receber Código</button>
-          ) : (
-            <button onClick={verificarCodigo}>Confirmar Código</button>
-          )}
+      {users.map(user => (
+        <div key={user.id} className='card'>
+          <div>
+            <span><p># {user.name} # :</p></span>
+            <span>{user.menssage}</span>
+          </div>
+          <button onClick={() => deleteUsers(user.id)}>🗑</button>
         </div>
-      )}
+      ))}
 
-      {verificado && (
-        <>
-          {users.map(user => (
-            <div key={user.id} className='card'>
-              <div>
-                <span><p># {user.name} # :</p></span>
-                <span>{user.menssage}</span>
-              </div>
-              <button onClick={() => deleteUsers(user.id)}>🗑</button>
-            </div>
-          ))}
+      <div ref={scrollRef}></div>
 
-          <div ref={scrollRef}></div>
+      <form>
+        <input className='nome' ref={inputName} placeholder='Nome' />
+        <input className='menssage' ref={inputMenssage} placeholder='Mensagem' />
+      </form>
 
-          <form>
-            <input className='nome' ref={inputName} placeholder='Nome' />
-            <input className='menssage' ref={inputMenssage} placeholder='Mensagem' />
-          </form>
-
-          <button className='enviar' onClick={createUsers}>ENVIAR</button>
-        </>
-      )}
+      <button className='enviar' onClick={createUsers}>ENVIAR</button>
     </div>
   )
 }
