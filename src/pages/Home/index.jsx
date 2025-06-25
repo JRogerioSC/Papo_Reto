@@ -183,7 +183,7 @@ function Home() {
       ) : (
         <>
           <p>Nome fixado: <strong>{name}</strong></p>
-          <button className='trocar-nome' onClick={trocarNome}>Trocar nome</button>
+          
           <input
             className='menssage'
             ref={inputMenssage}
