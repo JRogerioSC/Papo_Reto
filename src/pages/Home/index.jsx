@@ -21,6 +21,7 @@ function urlBase64ToUint8Array(base64String) {
 function Home() {
   const [users, setUsers] = useState([])
   const [name, setName] = useState(localStorage.getItem('username') || '')
+  const [cadastrado, setCadastrado] = useState(!!localStorage.getItem('username'))
   const inputName = useRef()
   const inputMenssage = useRef()
   const scrollRef = useRef()
@@ -37,48 +38,51 @@ function Home() {
     }
   }
 
-  async function createUsers() {
-    const fixedName = name || inputName.current?.value.trim()
-    const menssage = inputMenssage.current?.value.trim()
-
-    if (!fixedName || !menssage) {
-      return toast.warning('⚠️ Preencha todos os campos.', {
-        autoClose: 3000,
-        position: 'top-center'
-      })
+  async function cadastrarNome() {
+    const nome = inputName.current.value.trim()
+    if (!nome) {
+      toast.warning('⚠️ Digite um nome válido para cadastro.', { autoClose: 3000, position: 'top-center' })
+      return
     }
 
     try {
-      const res = await axios.post(`${BACKEND_URL}/usuarios`, {
-        name: fixedName,
-        menssage
-      })
-
-      if (!name) {
-        localStorage.setItem('username', fixedName)
-        setName(fixedName)
-      }
-
-      inputMenssage.current.value = ''
-
-      toast.success('📨 Mensagem enviada com sucesso!', {
-        position: 'top-center',
-        autoClose: 2000,
-        theme: 'colored'
-      })
-    } catch (error) {
-      const msg = error.response?.data?.error || 'Erro ao enviar mensagem.'
-      toast.error(`❌ ${msg}`, {
-        position: 'top-center',
-        autoClose: 3000,
-        theme: 'colored'
-      })
+      await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
+      toast.success(`✅ Nome "${nome}" cadastrado com sucesso!`, { autoClose: 2000, position: 'top-center' })
+      localStorage.setItem('username', nome)
+      setName(nome)
+      setCadastrado(true)
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Erro no cadastro do nome.'
+      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center' })
     }
+  }
+
+  async function enviarMensagem() {
+    const menssage = inputMenssage.current.value.trim()
+    if (!name) {
+      toast.warning('⚠️ Cadastre seu nome antes de enviar mensagens.', { autoClose: 3000, position: 'top-center' })
+      return
+    }
+    if (!menssage) {
+      toast.warning('⚠️ Digite uma mensagem.', { autoClose: 3000, position: 'top-center' })
+      return
+    }
+
+    try {
+      await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
+      toast.success('📨 Mensagem enviada com sucesso!', { autoClose: 2000, position: 'top-center', theme: 'colored' })
+      inputMenssage.current.value = ''
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Erro ao enviar mensagem.'
+      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center', theme: 'colored' })
+    }
+    getUsers()
   }
 
   function trocarNome() {
     localStorage.removeItem('username')
     setName('')
+    setCadastrado(false)
   }
 
   async function deleteUsers(id) {
@@ -129,7 +133,6 @@ function Home() {
         position: 'top-center',
         theme: 'light'
       })
-
       getUsers()
     })
 
@@ -162,32 +165,32 @@ function Home() {
 
       <div ref={scrollRef}></div>
 
-      <form>
-        {!name && (
+      {!cadastrado ? (
+        <>
           <input
             className='nome'
             ref={inputName}
-            placeholder='Digite seu nome'
+            placeholder='Digite seu nome para cadastrar'
             maxLength={20}
           />
-        )}
-        <input
-          className='menssage'
-          ref={inputMenssage}
-          placeholder='Mensagem'
-          maxLength={200}
-        />
-      </form>
-
-      <button className='enviar' onClick={createUsers}>ENVIAR</button>
-
-      {name && (
-        <button className='trocar-nome' onClick={trocarNome}>
-          Trocar nome ({name})
-        </button>
+          <button className='cadastrar' onClick={cadastrarNome}>CADASTRAR NOME</button>
+        </>
+      ) : (
+        <>
+          <p>Nome fixado: <strong>{name}</strong></p>
+          <button className='trocar-nome' onClick={trocarNome}>Trocar nome</button>
+          <input
+            className='menssage'
+            ref={inputMenssage}
+            placeholder='Digite sua mensagem'
+            maxLength={200}
+          />
+          <button className='enviar' onClick={enviarMensagem}>ENVIAR</button>
+        </>
       )}
     </div>
   )
 }
 
 export default Home
+
