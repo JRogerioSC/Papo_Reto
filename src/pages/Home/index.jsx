@@ -87,7 +87,9 @@ function Home() {
 
   async function deleteUsers(id) {
     try {
-      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
+        data: { name }
+      })
       getUsers()
     } catch (err) {
       const msg = err.response?.data?.error || 'Erro ao deletar.'
@@ -196,4 +198,3 @@ function Home() {
 }
 
 export default Home
-
