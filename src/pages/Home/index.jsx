@@ -40,43 +40,32 @@ function Home() {
 
   async function cadastrarNome() {
     const nome = inputName.current.value.trim()
-    if (!nome) {
-      toast.warning('⚠️ Digite um nome válido para cadastro.', { autoClose: 3000, position: 'top-center' })
-      return
-    }
+    if (!nome) return toast.warning('⚠️ Digite um nome válido.', { autoClose: 3000, position: 'top-center' })
 
     try {
       await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
-      toast.success(`✅ Nome "${nome}" cadastrado com sucesso!`, { autoClose: 2000, position: 'top-center' })
+      toast.success(`✅ Nome "${nome}" cadastrado!`, { autoClose: 2000, position: 'top-center' })
       localStorage.setItem('username', nome)
       setName(nome)
       setCadastrado(true)
     } catch (err) {
-      const msg = err.response?.data?.error || 'Erro no cadastro do nome.'
-      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center' })
+      toast.error(err.response?.data?.error || 'Erro no cadastro.', { autoClose: 3000, position: 'top-center' })
     }
   }
 
   async function enviarMensagem() {
     const menssage = inputMenssage.current.value.trim()
-    if (!name) {
-      toast.warning('⚠️ Cadastre seu nome antes de enviar mensagens.', { autoClose: 3000, position: 'top-center' })
-      return
-    }
-    if (!menssage) {
-      toast.warning('⚠️ Digite uma mensagem.', { autoClose: 3000, position: 'top-center' })
-      return
-    }
+    if (!name) return toast.warning('⚠️ Cadastre seu nome antes.', { autoClose: 3000, position: 'top-center' })
+    if (!menssage) return toast.warning('⚠️ Escreva uma mensagem.', { autoClose: 3000, position: 'top-center' })
 
     try {
       await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
-      toast.success('📨 Mensagem enviada com sucesso!', { autoClose: 2000, position: 'top-center', theme: 'colored' })
+      toast.success('📨 Mensagem enviada!', { autoClose: 2000, position: 'top-center' })
       inputMenssage.current.value = ''
+      getUsers()
     } catch (err) {
-      const msg = err.response?.data?.error || 'Erro ao enviar mensagem.'
-      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center', theme: 'colored' })
+      toast.error(err.response?.data?.error || 'Erro ao enviar.', { autoClose: 3000, position: 'top-center' })
     }
-    getUsers()
   }
 
   function trocarNome() {
@@ -114,20 +103,13 @@ function Home() {
     subscribeToPush()
 
     socketRef.current = io(BACKEND_URL)
-
     socketRef.current.on('connect', () => {
-      const nome = localStorage.getItem('username') || 'visitante'
-      socketRef.current.emit('register', nome)
+      socketRef.current.emit('register', localStorage.getItem('username') || 'visitante')
     })
-
     socketRef.current.on('nova_mensagem', msg => {
       toast.info(`💬 ${msg.name}: ${msg.menssage}`, {
         icon: () => (
-          <img
-            src={ICON_URL}
-            alt="Icon"
-            style={{ width: 24, height: 24, borderRadius: 4 }}
-          />
+          <img src={ICON_URL} alt="Icon" style={{ width: 24, height: 24, borderRadius: 4 }} />
         ),
         autoClose: 4000,
         position: 'top-center',
@@ -137,7 +119,6 @@ function Home() {
     })
 
     const interval = setInterval(getUsers, 2000)
-
     return () => {
       socketRef.current?.disconnect()
       clearInterval(interval)
@@ -167,24 +148,14 @@ function Home() {
 
       {!cadastrado ? (
         <>
-          <input
-            className='nome'
-            ref={inputName}
-            placeholder='Digite seu nome para cadastrar'
-            maxLength={20}
-          />
+          <input className='nome' ref={inputName} placeholder='Digite seu nome' maxLength={20} />
           <button className='cadastrar' onClick={cadastrarNome}>CADASTRAR NOME</button>
         </>
       ) : (
         <>
           <p>Nome fixado: <strong>{name}</strong></p>
           <button className='trocar-nome' onClick={trocarNome}>Trocar nome</button>
-          <input
-            className='menssage'
-            ref={inputMenssage}
-            placeholder='Digite sua mensagem'
-            maxLength={200}
-          />
+          <input className='menssage' ref={inputMenssage} placeholder='Digite sua mensagem' maxLength={200} />
           <button className='enviar' onClick={enviarMensagem}>ENVIAR</button>
         </>
       )}
@@ -193,4 +164,3 @@ function Home() {
 }
 
 export default Home
-
