@@ -114,3 +114,16 @@ form {
     opacity: 0.5;
   }
 }
+
+.trocar-nome{
+    display: flex;
+    border-radius: 8px;
+    background-color: #48456c;
+    color: #ededf3;
+
+    &:hover{
+      color: rgb(10, 19, 0);
+      cursor: pointer;
+      opacity: 0.5;
+    }
+  }
