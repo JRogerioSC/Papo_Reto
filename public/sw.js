@@ -4,8 +4,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'Nova Menssagem!'
   const options = {
     body: data.body || 'Você recebeu uma nova menssagem',
-    icon: data.icon || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg',
-    badge: data.badge || 'https://i.postimg.cc/6pfxh8tJ/512x512.jpg',
+    icon: data.icon || 'https://i.postimg.cc/k499mWs5/Chat-GPT-Image-23-de-jun-de-2025-21-00-52.png',
+    badge: data.badge || 'https://i.postimg.cc/k499mWs5/Chat-GPT-Image-23-de-jun-de-2025-21-00-52.png',
     data: {
       url: data.data?.url || '/'
     }
