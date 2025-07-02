@@ -3,9 +3,9 @@ import axios from 'axios'
 import { io } from 'socket.io-client'
 import './style.css'
 
-const socket = io('https://seu-backend-na-render.onrender.com') // altere para o seu backend
+const socket = io('https://api-papo-reto.onrender.com') // altere para o seu backend
 
-function App() {
+function Home() {
   const [messages, setMessages] = useState([])
   const [author, setAuthor] = useState('')
   const [content, setContent] = useState('')
@@ -15,7 +15,7 @@ function App() {
   const [gravando, setGravando] = useState(false)
 
   useEffect(() => {
-    axios.get('https://seu-backend-na-render.onrender.com/mensagens').then(res => {
+    axios.get('https://api-papo-reto.onrender.com/mensagens').then(res => {
       setMessages(res.data)
     })
 
@@ -35,7 +35,7 @@ function App() {
     form.append('type', media ? mediaType : 'text')
     if (media) form.append('media', media)
 
-    await axios.post('https://seu-backend-na-render.onrender.com/mensagem', form)
+    await axios.post('https://api-papo-reto.onrender.com/mensagem', form)
     setContent('')
     setMedia(null)
     setMediaType('')
@@ -113,5 +113,5 @@ function App() {
   )
 }
 
-export default App
+export default Home
 
