@@ -1,7 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
-import { io } from 'socket.io-client'
 import './style.css'
+import { io } from 'socket.io-client'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { register } from './serviceWorkerRegistration'
+
+register()
+
 
 const socket = io('https://api-papo-reto.onrender.com') // altere para o seu backend
 
