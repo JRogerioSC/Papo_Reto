@@ -8,116 +8,193 @@ import { register } from './serviceWorkerRegistration'
 
 register()
 
+const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
+const ICON_URL = 'https://i.postimg.cc/k499mWs5/Chat-GPT-Image-23-de-jun-de-2025-21-00-52.png'
+const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
-const socket = io('https://api-papo-reto.onrender.com') // altere para o seu backend
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = atob(base64)
+  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)))
+}
 
 function Home() {
-  const [messages, setMessages] = useState([])
-  const [author, setAuthor] = useState('')
-  const [content, setContent] = useState('')
-  const [media, setMedia] = useState(null)
-  const [mediaType, setMediaType] = useState('')
-  const mediaRecorderRef = useRef(null)
-  const [gravando, setGravando] = useState(false)
+  const [users, setUsers] = useState([])
+  const [name, setName] = useState(localStorage.getItem('username') || '')
+  const [cadastrado, setCadastrado] = useState(!!localStorage.getItem('username'))
+  const inputName = useRef()
+  const inputMenssage = useRef()
+  const scrollRef = useRef()
+  const socketRef = useRef(null)
+
+  async function getUsers() {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/usuarios`)
+      setUsers(res.data)
+    } catch (err) {
+      console.error('Erro ao buscar mensagens:', err)
+    }
+  }
+
+  async function cadastrarNome() {
+    const nome = inputName.current.value.trim()
+    if (!nome) {
+      toast.warning('⚠️ Digite um nome válido para cadastro.', { autoClose: 3000, position: 'top-center' })
+      return
+    }
+
+    try {
+      await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
+      toast.success(`✅ Nome "${nome}" cadastrado com sucesso!`, { autoClose: 2000, position: 'top-center' })
+      localStorage.setItem('username', nome)
+      setName(nome)
+      setCadastrado(true)
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Erro no cadastro do nome.'
+      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center' })
+    }
+  }
+
+  async function enviarMensagem() {
+    const menssage = inputMenssage.current.value.trim()
+    if (!name) {
+      toast.warning('⚠️ Cadastre seu nome antes de enviar mensagens.', { autoClose: 3000, position: 'top-center' })
+      return
+    }
+    if (!menssage) {
+      toast.warning('⚠️ Digite uma mensagem.', { autoClose: 3000, position: 'top-center' })
+      return
+    }
+
+    try {
+      await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
+      toast.success('📨 Mensagem enviada com sucesso!', { autoClose: 2000, position: 'top-center', theme: 'colored' })
+      inputMenssage.current.value = ''
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Erro ao enviar mensagem.'
+      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center', theme: 'colored' })
+    }
+
+    getUsers()
+  }
+
+  function trocarNome() {
+    localStorage.removeItem('username')
+    setName('')
+    setCadastrado(false)
+  }
+
+  async function deleteUsers(id) {
+    try {
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
+        data: { name }
+      })
+      getUsers()
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Erro ao deletar.'
+      toast.error(`❌ ${msg}`, { autoClose: 3000, position: 'top-center' })
+    }
+  }
+
+  async function subscribeToPush() {
+    if ('serviceWorker' in navigator) {
+      try {
+        const register = await navigator.serviceWorker.register('/sw.js')
+        const subscription = await register.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+        })
+        await axios.post(`${BACKEND_URL}/subscribe`, subscription)
+      } catch (error) {
+        console.error('Erro ao inscrever para push:', error)
+      }
+    }
+  }
 
   useEffect(() => {
-    axios.get('https://api-papo-reto.onrender.com/mensagens').then(res => {
-      setMessages(res.data)
+    getUsers()
+    subscribeToPush()
+
+    socketRef.current = io(BACKEND_URL)
+
+    socketRef.current.on('connect', () => {
+      const nome = localStorage.getItem('username') || 'visitante'
+      socketRef.current.emit('register', nome)
     })
 
-    socket.on('nova_mensagem', msg => {
-      setMessages(prev => [...prev, msg])
+    socketRef.current.on('nova_mensagem', msg => {
+      toast.info(`💬 ${msg.name}: ${msg.menssage}`, {
+        icon: () => (
+          <img
+            src={ICON_URL}
+            alt="Icon"
+            style={{ width: 24, height: 24, borderRadius: 4 }}
+          />
+        ),
+        autoClose: 4000,
+        position: 'top-center',
+        theme: 'light'
+      })
+      getUsers()
     })
 
-    return () => socket.off('nova_mensagem')
+    const interval = setInterval(getUsers, 2000)
+
+    return () => {
+      socketRef.current?.disconnect()
+      clearInterval(interval)
+    }
   }, [])
 
-  const enviarMensagem = async () => {
-    if (!author) return alert('Informe seu nome')
-
-    const form = new FormData()
-    form.append('author', author)
-    form.append('content', content)
-    form.append('type', media ? mediaType : 'text')
-    if (media) form.append('media', media)
-
-    await axios.post('https://api-papo-reto.onrender.com/mensagem', form)
-    setContent('')
-    setMedia(null)
-    setMediaType('')
-  }
-
-  const selecionarArquivo = (e, tipo) => {
-    const file = e.target.files[0]
-    if (file) {
-      setMedia(file)
-      setMediaType(tipo)
-    }
-  }
-
-  const iniciarGravacao = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    const recorder = new MediaRecorder(stream)
-    mediaRecorderRef.current = recorder
-    const chunks = []
-
-    recorder.ondataavailable = e => chunks.push(e.data)
-    recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/webm' })
-      const file = new File([blob], 'audio.webm', { type: 'audio/webm' })
-      setMedia(file)
-      setMediaType('audio')
-    }
-
-    recorder.start()
-    setGravando(true)
-  }
-
-  const pararGravacao = () => {
-    mediaRecorderRef.current?.stop()
-    setGravando(false)
-  }
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [users])
 
   return (
-    <div className="app">
-      <h2>Papo_Reto</h2>
-      <input
-        placeholder="Seu nome"
-        value={author}
-        onChange={e => setAuthor(e.target.value)}
-      />
+    <div className='container'>
+      <ToastContainer />
+      <h1>Papo_Reto</h1>
 
-      <div className="chat">
-        {messages.map(msg => (
-          <div key={msg.id} className="msg">
-            <strong>{msg.author}:</strong>
-            {msg.content && <p>{msg.content}</p>}
-            {msg.media && msg.type === 'image' && <img src={msg.media} alt="imagem" width="200" />}
-            {msg.media && msg.type === 'video' && <video src={msg.media} controls width="200" />}
-            {msg.media && msg.type === 'audio' && <audio src={msg.media} controls />}
+      {users.map(user => (
+        <div key={user.id} className='card'>
+          <div>
+            <span><p># {user.name} # :</p></span>
+            <span>{user.menssage}</span>
           </div>
-        ))}
-      </div>
+          {user.name.toLowerCase() === name.toLowerCase() && (
+            <button onClick={() => deleteUsers(user.id)}>🗑</button>
+          )}
+        </div>
+      ))}
 
-      <textarea
-        placeholder="Digite sua mensagem"
-        value={content}
-        onChange={e => setContent(e.target.value)}
-      />
+      <div ref={scrollRef}></div>
 
-      <div>
-        <input type="file" accept="image/*" onChange={e => selecionarArquivo(e, 'image')} />
-        <input type="file" accept="video/*" onChange={e => selecionarArquivo(e, 'video')} />
-        {!gravando ? (
-          <button onClick={iniciarGravacao}>🎙️ Gravar áudio</button>
-        ) : (
-          <button onClick={pararGravacao}>🛑 Parar</button>
-        )}
-        <button onClick={enviarMensagem}>Enviar</button>
-      </div>
+      {!cadastrado ? (
+        <>
+          <input
+            className='nome'
+            ref={inputName}
+            placeholder='Digite seu nome'
+            maxLength={20}
+          />
+          <button className='cadastrar' onClick={cadastrarNome}>CADASTRAR NOME</button>
+        </>
+      ) : (
+        <>
+          <p>Nome fixado: <strong>{name}</strong></p>
+
+          <input
+            className='menssage'
+            ref={inputMenssage}
+            placeholder='Digite sua mensagem'
+            maxLength={200}
+          />
+          <button className='enviar' onClick={enviarMensagem}>ENVIAR</button>
+        </>
+      )}
     </div>
   )
 }
 
 export default Home
-
