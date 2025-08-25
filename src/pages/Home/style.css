@@ -6,14 +6,6 @@
   padding-top: 100px;
 }
 
-h1 {
-  color: rgb(88, 161, 81);
-  background-color: transparent;
-  border-radius: 10px;
-  font-size: 32pix;
-  text-align: center;
-}
-
 form {
   display: flex;
   gap: 30px;

@@ -154,7 +154,6 @@ function Home() {
   return (
     <div className='container'>
       <ToastContainer />
-      <h1>Papo_Reto</h1>
 
       {users.map(user => (
         <div key={user.id} className='card'>
