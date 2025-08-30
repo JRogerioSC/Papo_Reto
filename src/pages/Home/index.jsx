@@ -125,6 +125,7 @@ function Home() {
 
     socketRef.current.on('nova_mensagem', msg => {
       toast.info(`${msg.name}: ${msg.menssage}`, {
+       
         autoClose: 4000,
         position: 'top-center',
         theme: 'light'
@@ -148,23 +149,17 @@ function Home() {
     <div className='container'>
       <ToastContainer />
 
-      {users.map(user => {
-        const isMyMessage = user.name.toLowerCase() === name.toLowerCase()
-        return (
-          <div
-            key={user.id}
-            className={`message ${isMyMessage ? 'sent' : 'received'}`}
-          >
-            <div className="bubble">
-              <p className="author"># {user.name} #</p>
-              <span>{user.menssage}</span>
-            </div>
-            {isMyMessage && (
-              <button className="deleteBtn" onClick={() => deleteUsers(user.id)}>🗑</button>
-            )}
+      {users.map(user => (
+        <div key={user.id} className='card'>
+          <div>
+            <span><p># {user.name} # :</p></span>
+            <span>{user.menssage}</span>
           </div>
-        )
-      })}
+          {user.name.toLowerCase() === name.toLowerCase() && (
+            <button onClick={() => deleteUsers(user.id)}>🗑</button>
+          )}
+        </div>
+      ))}
 
       <div ref={scrollRef}></div>
 
@@ -196,3 +191,4 @@ function Home() {
 }
 
 export default Home
+
