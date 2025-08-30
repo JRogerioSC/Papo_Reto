@@ -9,7 +9,7 @@ import { register } from './serviceWorkerRegistration'
 register()
 
 const PUBLIC_VAPID_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
-const ICON_URL = 'https://postimg.cc/WhVYB2Xp'
+const ICON_URL = 'https://i.postimg.cc/k499mWs5/Chat-GPT-Image-23-de-jun-de-2025-21-00-52.png'
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
 function urlBase64ToUint8Array(base64String) {
