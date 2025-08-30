@@ -124,14 +124,8 @@ function Home() {
     })
 
     socketRef.current.on('nova_mensagem', msg => {
-      toast.info(`💬 ${msg.name}: ${msg.menssage}`, {
-        icon: () => (
-          <img
-            src={ICON_URL}
-            alt="Icon"
-            style={{ width: 24, height: 24, borderRadius: 4 }}
-          />
-        ),
+      toast.info(`${msg.name}: ${msg.menssage}`, {
+       
         autoClose: 4000,
         position: 'top-center',
         theme: 'light'
