@@ -34,7 +34,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://pap0reto.netlify.app/",
+  "fullScopeUrl": "",
   "minSdkVersion": 21,
   "orientation": "portrait",
   "fingerprints": [],

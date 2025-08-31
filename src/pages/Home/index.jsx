@@ -69,7 +69,7 @@ function Home() {
 
     try {
       await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
-      toast.success('📨 Mensagem enviada com sucesso!', { autoClose: 2000, position: 'top-center', theme: 'colored' })
+      toast.success({ autoClose: 2000, position: 'top-center', theme: 'colored' })
       inputMenssage.current.value = ''
     } catch (err) {
       const msg = err.response?.data?.error || 'Erro ao enviar mensagem.'
