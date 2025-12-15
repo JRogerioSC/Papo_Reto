@@ -17,9 +17,9 @@ function Home() {
     !!localStorage.getItem('username')
   )
 
-  const inputName = useRef()
-  const inputMenssage = useRef()
-  const scrollRef = useRef()
+  const inputName = useRef(null)
+  const inputMenssage = useRef(null)
+  const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
   async function getUsers() {
@@ -64,15 +64,16 @@ function Home() {
         data: { name }
       })
       getUsers()
-    } catch {
+    } catch (err) {
+      console.error(err)
       toast.error('Erro ao deletar')
     }
   }
 
   useEffect(() => {
     getUsers()
-    socketRef.current = io(BACKEND_URL)
 
+    socketRef.current = io(BACKEND_URL)
     socketRef.current.on('nova_mensagem', getUsers)
 
     return () => socketRef.current.disconnect()
@@ -94,10 +95,9 @@ function Home() {
 
           return (
             <div
-              key={user._id}                 // ✅ CORRIGIDO
+              key={user.id}
               className={`card ${isMine ? 'mine' : 'other'}`}
             >
-              {/* Conteúdo da mensagem */}
               <div className="message-content">
                 {!isMine && (
                   <span className="user-name">{user.name}</span>
@@ -115,11 +115,11 @@ function Home() {
                 </span>
               </div>
 
-              {/* 🗑 Lixeira (somente mensagens enviadas) */}
+              {/* 🗑 Lixeira (somente mensagens do autor) */}
               {isMine && (
                 <button
                   className="delete"
-                  onClick={() => deleteUsers(user._id)} // ✅ CORRIGIDO
+                  onClick={() => deleteUsers(user.id)}
                   title="Apagar mensagem"
                 >
                   🗑
