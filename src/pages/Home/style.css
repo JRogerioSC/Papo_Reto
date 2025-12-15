@@ -1,121 +1,150 @@
 .container {
   display: flex;
-  Justify-content: flex-end;
+  justify-content: flex-end;
   align-items: center;
   flex-direction: column;
   padding-top: 100px;
 }
 
-form {
-  display: flex;
-  gap: 30px;
-  padding: -7 vmin;
-  border-radius: 10px;
-  background-color: transparent;
-  max-width: 50%;
-  width: 400px;
-  margin-bottom: 20px;
-
-  input {
-    display: flex;
-    padding: 2%;
-  }
-
-
-
-}
+/* =====================
+   FORM / INPUTS
+===================== */
 
 .enviar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border-radius: 30px;
   background-color: rgb(96, 134, 168);
   color: rgb(235, 242, 248);
-  height: 30px;
-  margin-top: 10px;
+
+  height: 40px;
+  min-width: 90px;
+  padding: 0 20px;
+
   border: none;
   font-weight: bold;
   cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s ease;
 }
 
 .enviar:hover {
-  opacity: 0.8;
-  color: red;
+  opacity: 0.85;
+  transform: scale(1.05);
+  color: #fff;
 }
+
 
 .nome {
   border: 1px solid #48456c;
   border-radius: 30px;
-  padding: 25px;
+  padding: 15px;
   height: 40px;
   background-color: #f9f9fc;
   outline: none;
+  margin-bottom: 8px;
 }
 
 .menssage {
-  display: flex;
   border: 1px solid #f8f8fc;
-  border-radius: 7px;
+  border-radius: 20px;
   height: 50px;
   width: 300px;
   margin-top: 9px;
-  padding: 30px;
+  padding: 15px;
   background-color: #f5f5f8;
   outline: none;
 }
 
+/* =====================
+   CHAT CARDS
+===================== */
+
 .card {
   display: flex;
-  justify-content: space-between;
-  background-color: rgb(233, 237, 241);
-  margin: 10px;
-  padding: 2px;
-  width: 400px;
-  border-radius: 7px;
-
-  & p {
-    color: #71aa14;
-    font-weight: bold;
-    text-transform: capitalize;
-  }
-
-  & span {
-    font-weight: normal;
-  }
-
-  & button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-  }
-
-  & button:hover {
-    opacity: 0.5;
-  }
-
+  flex-direction: column;
+  max-width: 75%;
+  padding: 10px 14px;
+  margin: 6px 0;
+  border-radius: 12px;
+  word-wrap: break-word;
 }
 
+/* 📤 ENVIADAS (DIREITA) */
+.card.mine {
+  align-self: flex-end;
+  background-color: #dcf8c6;
+  border-bottom-right-radius: 2px;
+  text-align: right;
+}
+
+/* 📥 RECEBIDAS (ESQUERDA) */
+.card.other {
+  align-self: flex-start;
+  background-color: rgb(233, 237, 241);
+  border-bottom-left-radius: 2px;
+  text-align: left;
+}
+
+/* Nome do usuário */
+.card .user-name {
+  color: #71aa14;
+  font-weight: bold;
+  text-transform: capitalize;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+/* Texto da mensagem */
+.card .text {
+  font-weight: normal;
+  font-size: 14px;
+}
+
+/* Botão deletar */
+.card button {
+  align-self: flex-end;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.card button:hover {
+  opacity: 0.5;
+}
+
+/* =====================
+   BOTÕES
+===================== */
+
 .cadastrar {
-  display: flex;
   margin-top: 9px;
   background-color: #0e0729;
   border-radius: 9px;
   color: #f4f4fa;
-
-  &:hover {
-    color: #48456c;
-    cursor: pointer;
-    opacity: 0.5;
-  }
+  padding: 8px 12px;
+  border: none;
 }
 
-.trocar-nome{
-    display: flex;
-    border-radius: 8px;
-    background-color: #48456c;
-    color: #ededf3;
+.cadastrar:hover {
+  color: #48456c;
+  cursor: pointer;
+  opacity: 0.7;
+}
 
-    &:hover{
-      color: rgb(10, 19, 0);
-      cursor: pointer;
-      opacity: 0.5;
-    }
-  }
+.trocar-nome {
+  border-radius: 8px;
+  background-color: #48456c;
+  color: #ededf3;
+  padding: 6px 10px;
+  border: none;
+}
+
+.trocar-nome:hover {
+  color: rgb(10, 19, 0);
+  cursor: pointer;
+  opacity: 0.5;
+}

@@ -6,22 +6,22 @@
 }
 
 body {
-
   min-height: 100vh;
   width: 100vw;
   background-color: #01000e;
-  align-self: flex-end;
 }
 
+/* =====================
+   MOBILE
+===================== */
 
-@media(max-width:750px) {
-
+@media (max-width: 750px) {
 
   body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 50vh;
+    min-height: 100vh;
     width: 100vw;
     background-color: #010005;
   }
@@ -30,12 +30,13 @@ body {
     display: flex;
     flex-direction: column;
     padding: 4%;
+    width: 100%;
   }
 
   form {
     display: flex;
     gap: 5px;
-    padding: -7 vmin;
+    padding: 0;
     border-radius: 10px;
     background-color: transparent;
     max-width: 100%;
@@ -43,80 +44,101 @@ body {
     margin-bottom: 40px;
   }
 
+  /* CHAT */
   .card {
-    display: flex;
-    justify-content: space-between;
-    background-color: rgb(246, 248, 250);
-    margin: 9px;
-    padding: 9px;
-    width: 250px;
-    border-radius: 7px;
-    margin-top: 1px;
+    max-width: 85%;
+    padding: 10px;
+    margin: 4px 0;
+    border-radius: 12px;
+  }
 
+  .card.mine {
+    align-self: flex-end;
+    background-color: #dcf8c6;
+    text-align: right;
+  }
+
+  .card.other {
+    align-self: flex-start;
+    background-color: rgb(246, 248, 250);
+    text-align: left;
   }
 
   .enviar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     border-radius: 30px;
     background-color: rgb(96, 134, 168);
     color: rgb(235, 242, 248);
-    height: 30px;
-    width: 50px;
+
+    height: 40px;
+    min-width: 90px;
+    padding: 0 20px;
+
     border: none;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 9px;
+    margin-top: 10px;
+    transition: 0.2s ease;
   }
 
+  .enviar:hover {
+    opacity: 0.85;
+    transform: scale(1.05);
+    color: #fff;
+  }
+
+
   .menssage {
-    display: flex;
     border: 1px solid #ededf3;
-    border-radius: 7px;
+    border-radius: 20px;
     height: 50px;
     background-color: #f4f4fa;
     outline: none;
-    padding: 20px;
+    padding: 15px;
     width: 220px;
-    margin-top: 2px 5px;
     margin-top: 9px;
   }
 
   .nome {
     border: 1px solid #48456c;
     border-radius: 30px;
-    padding: 20px;
-    height: 30px;
+    padding: 15px;
+    height: 35px;
     width: 150px;
     background-color: #fdfdff;
     outline: none;
-    margin-top: 2px 5px;
-
+    margin-top: 9px;
   }
 
-  .cadastrar{
-    display: flex;
+  .cadastrar {
     margin-top: 9px;
     background-color: #0e0729;
     border-radius: 9px;
     color: #f4f4fa;
+    border: none;
+    padding: 6px 10px;
   }
 
-  .cadastrar:hover{
+  .cadastrar:hover {
     color: #48456c;
     cursor: pointer;
     opacity: 0.5;
   }
 
-  .trocar-nome{
-    display: flex;
+  .trocar-nome {
     border-radius: 8px;
     background-color: #48456c;
     color: #ededf3;
-
-    &:hover{
-      color: rgb(10, 19, 0);
-      cursor: pointer;
-      opacity: 0.5;
-    }
+    padding: 6px 10px;
+    border: none;
   }
 
+  .trocar-nome:hover {
+    color: rgb(10, 19, 0);
+    cursor: pointer;
+    opacity: 0.5;
+  }
 }
