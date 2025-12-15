@@ -22,12 +22,11 @@ function Home() {
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
-  // 🔄 BUSCAR MENSAGENS (FILTRANDO DADOS QUEBRADOS)
+  // 🔄 BUSCAR MENSAGENS (FILTRA REGISTROS QUEBRADOS)
   async function getUsers() {
     try {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
 
-      // 🔥 REMOVE mensagens inválidas (sem createdAt ou name)
       const validMessages = res.data.filter(
         m => m.createdAt && m.name && m.menssage
       )
@@ -53,10 +52,9 @@ function Home() {
     toast.success('Nome definido com sucesso!')
   }
 
-  // 📤 ENVIAR MENSAGEM (VALIDAÇÃO FORTE)
+  // 📤 ENVIAR MENSAGEM
   async function enviarMensagem() {
     const menssage = inputMenssage.current.value.trim()
-
     if (!menssage) return
 
     if (!name) {
@@ -65,21 +63,15 @@ function Home() {
     }
 
     try {
-      await axios.post(`${BACKEND_URL}/usuarios`, {
-        name,
-        menssage
-      })
-
+      await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
       inputMenssage.current.value = ''
     } catch (err) {
       console.error(err)
-      toast.error(
-        err.response?.data?.error || 'Erro ao enviar mensagem'
-      )
+      toast.error(err.response?.data?.error || 'Erro ao enviar mensagem')
     }
   }
 
-  // 🗑 APAGAR MENSAGEM
+  // 🗑 APAGAR MENSAGEM (SÓ AUTOR)
   async function deleteUsers(id) {
     try {
       await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
@@ -93,6 +85,8 @@ function Home() {
 
   // 🔌 SOCKET.IO
   useEffect(() => {
+    if (!cadastrado) return
+
     getUsers()
 
     socketRef.current = io(BACKEND_URL)
@@ -108,7 +102,7 @@ function Home() {
     })
 
     return () => socketRef.current.disconnect()
-  }, [])
+  }, [cadastrado])
 
   // ⬇️ SCROLL AUTOMÁTICO
   useEffect(() => {
@@ -119,77 +113,83 @@ function Home() {
     <div className="container">
       <ToastContainer />
 
-      {/* 💬 CHAT */}
-      <div className="chat">
-        {users.map(user => {
-          const isMine =
-            user.name.toLowerCase() === name.toLowerCase()
+      {/* 🚪 TELA DE CADASTRO */}
+      {!cadastrado && (
+        <div className="register-container">
+          <h2>Bem-vindo ao Papo Reto</h2>
 
-          return (
-            <div
-              key={user.id}
-              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
-            >
-              <div className="bubble-row">
-                <div className={`card ${isMine ? 'mine' : 'other'}`}>
-                  {!isMine && (
-                    <span className="user-name">{user.name}</span>
-                  )}
-
-                  <span className="text">{user.menssage}</span>
-                </div>
-
-                {isMine && (
-                  <button
-                    className="delete"
-                    onClick={() => deleteUsers(user.id)}
-                    title="Apagar mensagem"
-                  >
-                    🗑
-                  </button>
-                )}
-              </div>
-
-              {/* ⏰ HORA SEGURA */}
-              <span className={`time ${isMine ? 'mine' : 'other'}`}>
-                {user.createdAt
-                  ? new Date(user.createdAt).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })
-                  : '--:--'}
-              </span>
-            </div>
-          )
-        })}
-
-        <div ref={scrollRef} />
-      </div>
-
-      {/* ⌨️ INPUT */}
-      {!cadastrado ? (
-        <>
           <input
             className="nome"
             ref={inputName}
             placeholder="Digite seu nome"
           />
+
           <button className="cadastrar" onClick={cadastrarNome}>
             ENTRAR
           </button>
-        </>
-      ) : (
-        <div className="input-area">
-          <input
-            className="menssage"
-            ref={inputMenssage}
-            placeholder="Digite sua mensagem"
-            onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
-          />
-          <button className="enviar" onClick={enviarMensagem}>
-            ENVIAR
-          </button>
         </div>
+      )}
+
+      {/* 💬 CHAT (SÓ SE CADASTRADO) */}
+      {cadastrado && (
+        <>
+          <div className="chat">
+            {users.map(user => {
+              const isMine =
+                user.name.toLowerCase() === name.toLowerCase()
+
+              return (
+                <div
+                  key={user.id}
+                  className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+                >
+                  <div className="bubble-row">
+                    <div className={`card ${isMine ? 'mine' : 'other'}`}>
+                      {!isMine && (
+                        <span className="user-name">{user.name}</span>
+                      )}
+                      <span className="text">{user.menssage}</span>
+                    </div>
+
+                    {isMine && (
+                      <button
+                        className="delete"
+                        onClick={() => deleteUsers(user.id)}
+                        title="Apagar mensagem"
+                      >
+                        🗑
+                      </button>
+                    )}
+                  </div>
+
+                  <span className={`time ${isMine ? 'mine' : 'other'}`}>
+                    {user.createdAt
+                      ? new Date(user.createdAt).toLocaleTimeString('pt-BR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                      : '--:--'}
+                  </span>
+                </div>
+              )
+            })}
+
+            <div ref={scrollRef} />
+          </div>
+
+          {/* ⌨️ INPUT */}
+          <div className="input-area">
+            <input
+              className="menssage"
+              ref={inputMenssage}
+              placeholder="Digite sua mensagem"
+              onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
+            />
+            <button className="enviar" onClick={enviarMensagem}>
+              ENVIAR
+            </button>
+          </div>
+        </>
       )}
     </div>
   )
