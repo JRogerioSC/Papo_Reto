@@ -13,13 +13,6 @@ const PUBLIC_VAPID_KEY =
 
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const rawData = atob(base64)
-  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)))
-}
-
 function Home() {
   const [users, setUsers] = useState([])
   const [name, setName] = useState(localStorage.getItem('username') || '')
@@ -35,84 +28,53 @@ function Home() {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
       setUsers(res.data)
     } catch (err) {
-      console.error('Erro ao buscar mensagens:', err)
+      console.error(err)
     }
   }
 
   async function cadastrarNome() {
     const nome = inputName.current.value.trim()
-    if (!nome) {
-      toast.warning('⚠️ Digite um nome válido.', { position: 'top-center' })
-      return
-    }
+    if (!nome) return toast.warning('Digite um nome válido')
 
     try {
       await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
       localStorage.setItem('username', nome)
       setName(nome)
       setCadastrado(true)
-      toast.success('✅ Nome cadastrado!', { position: 'top-center' })
+      toast.success('Nome cadastrado!')
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao cadastrar', {
-        position: 'top-center'
-      })
+      toast.error(err.response?.data?.error || 'Erro')
     }
   }
 
   async function enviarMensagem() {
     const menssage = inputMenssage.current.value.trim()
-
     if (!menssage) return
 
     try {
       await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
       inputMenssage.current.value = ''
-    } catch (err) {
-      toast.error('Erro ao enviar mensagem')
+    } catch {
+      toast.error('Erro ao enviar')
     }
   }
 
   async function deleteUsers(id) {
     try {
-      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
-        data: { name }
-      })
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
       getUsers()
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao deletar')
-    }
-  }
-
-  async function subscribeToPush() {
-    if ('serviceWorker' in navigator) {
-      try {
-        const reg = await navigator.serviceWorker.register('/sw.js')
-        const subscription = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
-        })
-        await axios.post(`${BACKEND_URL}/subscribe`, subscription)
-      } catch (error) {
-        console.error('Erro no push:', error)
-      }
+    } catch {
+      toast.error('Erro ao deletar')
     }
   }
 
   useEffect(() => {
     getUsers()
-    subscribeToPush()
-
     socketRef.current = io(BACKEND_URL)
 
-    socketRef.current.on('connect', () => {
-      socketRef.current.emit('register', name || 'visitante')
-    })
+    socketRef.current.on('nova_mensagem', getUsers)
 
-    socketRef.current.on('nova_mensagem', () => {
-      getUsers()
-    })
-
-    return () => socketRef.current?.disconnect()
+    return () => socketRef.current.disconnect()
   }, [])
 
   useEffect(() => {
@@ -120,47 +82,54 @@ function Home() {
   }, [users])
 
   return (
-    <div className='container'>
+    <div className="container">
       <ToastContainer />
 
-      {users.map(user => {
-        const isMine =
-          user.name.toLowerCase() === name.toLowerCase()
+      {/* 🔹 CHAT */}
+      <div className="chat">
+        {users.map(user => {
+          const isMine =
+            user.name.toLowerCase() === name.toLowerCase()
 
-        return (
-          <div
-            key={user.id}
-            className={`card ${isMine ? 'mine' : 'other'}`}
-          >
-            <p className='user-name'>{user.name}</p>
-            <span className='text'>{user.menssage}</span>
+          return (
+            <div
+              key={user.id}
+              className={`card ${isMine ? 'mine' : 'other'}`}
+            >
+              <p className="user-name">{user.name}</p>
+              <span className="text">{user.menssage}</span>
 
-            {isMine && (
-              <button onClick={() => deleteUsers(user.id)}>🗑</button>
-            )}
-          </div>
-        )
-      })}
+              {isMine && (
+                <button onClick={() => deleteUsers(user.id)}>🗑</button>
+              )}
+            </div>
+          )
+        })}
+        <div ref={scrollRef} />
+      </div>
 
-      <div ref={scrollRef} />
-
+      {/* 🔹 INPUTS */}
       {!cadastrado ? (
         <>
           <input
-            className='nome'
+            className="nome"
             ref={inputName}
-            placeholder='Digite seu nome'
+            placeholder="Digite seu nome"
           />
-          <button onClick={cadastrarNome}>CADASTRAR</button>
+          <button className="cadastrar" onClick={cadastrarNome}>
+            CADASTRAR
+          </button>
         </>
       ) : (
         <>
           <input
-            className='menssage'
+            className="menssage"
             ref={inputMenssage}
-            placeholder='Digite sua mensagem'
+            placeholder="Digite sua mensagem"
           />
-          <button onClick={enviarMensagem}>ENVIAR</button>
+          <button className="enviar" onClick={enviarMensagem}>
+            ENVIAR
+          </button>
         </>
       )}
     </div>
@@ -168,3 +137,4 @@ function Home() {
 }
 
 export default Home
+
