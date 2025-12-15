@@ -22,18 +22,24 @@ function Home() {
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
-  // 🔄 BUSCAR MENSAGENS
+  // 🔄 BUSCAR MENSAGENS (FILTRANDO DADOS QUEBRADOS)
   async function getUsers() {
     try {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
-      setUsers(res.data)
+
+      // 🔥 REMOVE mensagens inválidas (sem createdAt ou name)
+      const validMessages = res.data.filter(
+        m => m.createdAt && m.name && m.menssage
+      )
+
+      setUsers(validMessages)
     } catch (err) {
       console.error(err)
       toast.error('Erro ao carregar mensagens')
     }
   }
 
-  // 👤 CADASTRAR NOME (LOCAL)
+  // 👤 DEFINIR NOME LOCAL
   function cadastrarNome() {
     const nome = inputName.current.value.trim()
 
@@ -47,11 +53,16 @@ function Home() {
     toast.success('Nome definido com sucesso!')
   }
 
-  // 📤 ENVIAR MENSAGEM
+  // 📤 ENVIAR MENSAGEM (VALIDAÇÃO FORTE)
   async function enviarMensagem() {
     const menssage = inputMenssage.current.value.trim()
 
     if (!menssage) return
+
+    if (!name) {
+      toast.error('Nome não definido')
+      return
+    }
 
     try {
       await axios.post(`${BACKEND_URL}/usuarios`, {
@@ -62,11 +73,13 @@ function Home() {
       inputMenssage.current.value = ''
     } catch (err) {
       console.error(err)
-      toast.error('Erro ao enviar mensagem')
+      toast.error(
+        err.response?.data?.error || 'Erro ao enviar mensagem'
+      )
     }
   }
 
-  // 🗑 APAGAR MENSAGEM (SÓ O AUTOR)
+  // 🗑 APAGAR MENSAGEM
   async function deleteUsers(id) {
     try {
       await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
@@ -85,7 +98,9 @@ function Home() {
     socketRef.current = io(BACKEND_URL)
 
     socketRef.current.on('nova_mensagem', msg => {
-      setUsers(prev => [...prev, msg])
+      if (msg?.createdAt) {
+        setUsers(prev => [...prev, msg])
+      }
     })
 
     socketRef.current.on('mensagem_apagada', id => {
@@ -135,12 +150,14 @@ function Home() {
                 )}
               </div>
 
-              {/* ⏰ HORA FIXA DO BANCO */}
+              {/* ⏰ HORA SEGURA */}
               <span className={`time ${isMine ? 'mine' : 'other'}`}>
-                {new Date(user.createdAt).toLocaleTimeString('pt-BR', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+                {user.createdAt
+                  ? new Date(user.createdAt).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                  : '--:--'}
               </span>
             </div>
           )
@@ -149,7 +166,7 @@ function Home() {
         <div ref={scrollRef} />
       </div>
 
-      {/* ⌨️ INPUTS */}
+      {/* ⌨️ INPUT */}
       {!cadastrado ? (
         <>
           <input
@@ -179,4 +196,3 @@ function Home() {
 }
 
 export default Home
-
