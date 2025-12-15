@@ -13,7 +13,9 @@ const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 function Home() {
   const [users, setUsers] = useState([])
   const [name, setName] = useState(localStorage.getItem('username') || '')
-  const [cadastrado, setCadastrado] = useState(!!localStorage.getItem('username'))
+  const [cadastrado, setCadastrado] = useState(
+    !!localStorage.getItem('username')
+  )
 
   const inputName = useRef()
   const inputMenssage = useRef()
@@ -95,24 +97,30 @@ function Home() {
               key={user.id}
               className={`card ${isMine ? 'mine' : 'other'}`}
             >
-              {/* nome só nas recebidas */}
-              {!isMine && (
-                <span className="user-name">{user.name}</span>
-              )}
-
-              <span className="text">{user.menssage}</span>
-
-              <span className="time">
-                {new Date(user.createdAt || Date.now()).toLocaleTimeString(
-                  'pt-BR',
-                  { hour: '2-digit', minute: '2-digit' }
+              {/* Conteúdo da mensagem */}
+              <div className="message-content">
+                {!isMine && (
+                  <span className="user-name">{user.name}</span>
                 )}
-              </span>
 
+                <span className="text">{user.menssage}</span>
+
+                <span className="time">
+                  {new Date(
+                    user.createdAt || Date.now()
+                  ).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+
+              {/* Lixeira (somente mensagens enviadas) */}
               {isMine && (
                 <button
                   className="delete"
                   onClick={() => deleteUsers(user.id)}
+                  title="Apagar mensagem"
                 >
                   🗑
                 </button>
@@ -152,4 +160,3 @@ function Home() {
 }
 
 export default Home
-
