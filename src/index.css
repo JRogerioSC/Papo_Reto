@@ -33,6 +33,15 @@ body {
     width: 100%;
   }
 
+  /* 🔹 CONTAINER DO CHAT */
+  .chat {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
+    margin-bottom: 15px;
+  }
+
   form {
     display: flex;
     gap: 5px;
@@ -44,39 +53,43 @@ body {
     margin-bottom: 40px;
   }
 
-  /* CHAT */
+  /* 🔹 BOLHAS DE MENSAGEM */
   .card {
     max-width: 85%;
-    padding: 10px;
+    padding: 10px 14px;
     margin: 4px 0;
-    border-radius: 12px;
+    border-radius: 14px;
+    word-wrap: break-word;
+    font-size: 14px;
   }
 
+  /* Mensagem enviada */
   .card.mine {
     align-self: flex-end;
     background-color: #dcf8c6;
     text-align: right;
+    border-bottom-right-radius: 4px;
   }
 
+  /* Mensagem recebida */
   .card.other {
     align-self: flex-start;
     background-color: rgb(246, 248, 250);
     text-align: left;
+    border-bottom-left-radius: 4px;
   }
 
+  /* 🔹 BOTÃO ENVIAR */
   .enviar {
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 30px;
     background-color: rgb(96, 134, 168);
     color: rgb(235, 242, 248);
-
     height: 40px;
     min-width: 90px;
     padding: 0 20px;
-
     border: none;
     font-weight: bold;
     cursor: pointer;
@@ -90,7 +103,7 @@ body {
     color: #fff;
   }
 
-
+  /* 🔹 INPUTS */
   .menssage {
     border: 1px solid #ededf3;
     border-radius: 20px;
@@ -113,6 +126,7 @@ body {
     margin-top: 9px;
   }
 
+  /* 🔹 BOTÕES AUXILIARES */
   .cadastrar {
     margin-top: 9px;
     background-color: #0e0729;
