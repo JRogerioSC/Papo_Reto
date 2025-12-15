@@ -12,33 +12,28 @@ const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
 function Home() {
   const [users, setUsers] = useState([])
-  const [name, setName] = useState(localStorage.getItem('username') || '')
-  const [cadastrado, setCadastrado] = useState(
-    !!localStorage.getItem('username')
-  )
+  const [name, setName] = useState('')
+  const [cadastrado, setCadastrado] = useState(false)
 
   const inputName = useRef(null)
   const inputMenssage = useRef(null)
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
-  // 🔄 BUSCAR MENSAGENS (FILTRA REGISTROS QUEBRADOS)
+  // 🔄 BUSCAR MENSAGENS
   async function getUsers() {
     try {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
-
-      const validMessages = res.data.filter(
+      const valid = res.data.filter(
         m => m.createdAt && m.name && m.menssage
       )
-
-      setUsers(validMessages)
-    } catch (err) {
-      console.error(err)
+      setUsers(valid)
+    } catch {
       toast.error('Erro ao carregar mensagens')
     }
   }
 
-  // 👤 DEFINIR NOME LOCAL
+  // 👤 ENTRAR (CADASTRO LOCAL)
   function cadastrarNome() {
     const nome = inputName.current.value.trim()
 
@@ -49,7 +44,7 @@ function Home() {
     localStorage.setItem('username', nome)
     setName(nome)
     setCadastrado(true)
-    toast.success('Nome definido com sucesso!')
+    toast.success('Bem-vindo!')
   }
 
   // 📤 ENVIAR MENSAGEM
@@ -57,33 +52,26 @@ function Home() {
     const menssage = inputMenssage.current.value.trim()
     if (!menssage) return
 
-    if (!name) {
-      toast.error('Nome não definido')
-      return
-    }
-
     try {
       await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
       inputMenssage.current.value = ''
     } catch (err) {
-      console.error(err)
-      toast.error(err.response?.data?.error || 'Erro ao enviar mensagem')
+      toast.error(err.response?.data?.error || 'Erro ao enviar')
     }
   }
 
-  // 🗑 APAGAR MENSAGEM (SÓ AUTOR)
+  // 🗑 APAGAR
   async function deleteUsers(id) {
     try {
       await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
         data: { name }
       })
-    } catch (err) {
-      console.error(err)
-      toast.error('Erro ao apagar mensagem')
+    } catch {
+      toast.error('Erro ao apagar')
     }
   }
 
-  // 🔌 SOCKET.IO
+  // 🔌 SOCKET (SÓ APÓS CADASTRO)
   useEffect(() => {
     if (!cadastrado) return
 
@@ -104,19 +92,19 @@ function Home() {
     return () => socketRef.current.disconnect()
   }, [cadastrado])
 
-  // ⬇️ SCROLL AUTOMÁTICO
+  // ⬇️ SCROLL
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [users])
 
-  return (
-    <div className="container">
-      <ToastContainer />
+  // 🚪 SE NÃO CADASTRADO → TELA DE CADASTRO (RETORNO IMEDIATO)
+  if (!cadastrado) {
+    return (
+      <div className="container">
+        <ToastContainer />
 
-      {/* 🚪 TELA DE CADASTRO */}
-      {!cadastrado && (
         <div className="register-container">
-          <h2>Bem-vindo ao Papo Reto</h2>
+          <h2>Papo Reto</h2>
 
           <input
             className="nome"
@@ -128,71 +116,68 @@ function Home() {
             ENTRAR
           </button>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* 💬 CHAT (SÓ SE CADASTRADO) */}
-      {cadastrado && (
-        <>
-          <div className="chat">
-            {users.map(user => {
-              const isMine =
-                user.name.toLowerCase() === name.toLowerCase()
+  // 💬 CHAT
+  return (
+    <div className="container">
+      <ToastContainer />
 
-              return (
-                <div
-                  key={user.id}
-                  className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
-                >
-                  <div className="bubble-row">
-                    <div className={`card ${isMine ? 'mine' : 'other'}`}>
-                      {!isMine && (
-                        <span className="user-name">{user.name}</span>
-                      )}
-                      <span className="text">{user.menssage}</span>
-                    </div>
+      <div className="chat">
+        {users.map(user => {
+          const isMine =
+            user.name.toLowerCase() === name.toLowerCase()
 
-                    {isMine && (
-                      <button
-                        className="delete"
-                        onClick={() => deleteUsers(user.id)}
-                        title="Apagar mensagem"
-                      >
-                        🗑
-                      </button>
-                    )}
-                  </div>
-
-                  <span className={`time ${isMine ? 'mine' : 'other'}`}>
-                    {user.createdAt
-                      ? new Date(user.createdAt).toLocaleTimeString('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })
-                      : '--:--'}
-                  </span>
+          return (
+            <div
+              key={user.id}
+              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+            >
+              <div className="bubble-row">
+                <div className={`card ${isMine ? 'mine' : 'other'}`}>
+                  {!isMine && <span className="user-name">{user.name}</span>}
+                  <span className="text">{user.menssage}</span>
                 </div>
-              )
-            })}
 
-            <div ref={scrollRef} />
-          </div>
+                {isMine && (
+                  <button
+                    className="delete"
+                    onClick={() => deleteUsers(user.id)}
+                  >
+                    🗑
+                  </button>
+                )}
+              </div>
 
-          {/* ⌨️ INPUT */}
-          <div className="input-area">
-            <input
-              className="menssage"
-              ref={inputMenssage}
-              placeholder="Digite sua mensagem"
-              onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
-            />
-            <button className="enviar" onClick={enviarMensagem}>
-              ENVIAR
-            </button>
-          </div>
-        </>
-      )}
+              <span className={`time ${isMine ? 'mine' : 'other'}`}>
+                {new Date(user.createdAt).toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
+          )
+        })}
+
+        <div ref={scrollRef} />
+      </div>
+
+      <div className="input-area">
+        <input
+          className="menssage"
+          ref={inputMenssage}
+          placeholder="Digite sua mensagem"
+          onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
+        />
+        <button className="enviar" onClick={enviarMensagem}>
+          ENVIAR
+        </button>
+      </div>
     </div>
   )
 }
 
 export default Home
+
