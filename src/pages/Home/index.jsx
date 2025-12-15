@@ -22,63 +22,80 @@ function Home() {
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
+  // 🔄 BUSCAR MENSAGENS
   async function getUsers() {
     try {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
       setUsers(res.data)
     } catch (err) {
       console.error(err)
+      toast.error('Erro ao carregar mensagens')
     }
   }
 
-  async function cadastrarNome() {
+  // 👤 CADASTRAR NOME (LOCAL)
+  function cadastrarNome() {
     const nome = inputName.current.value.trim()
-    if (!nome) return toast.warning('Digite um nome válido')
 
-    try {
-      await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
-      localStorage.setItem('username', nome)
-      setName(nome)
-      setCadastrado(true)
-      toast.success('Nome cadastrado!')
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro')
+    if (!nome) {
+      return toast.warning('Digite um nome válido')
     }
+
+    localStorage.setItem('username', nome)
+    setName(nome)
+    setCadastrado(true)
+    toast.success('Nome definido com sucesso!')
   }
 
+  // 📤 ENVIAR MENSAGEM
   async function enviarMensagem() {
     const menssage = inputMenssage.current.value.trim()
+
     if (!menssage) return
 
     try {
-      await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
+      await axios.post(`${BACKEND_URL}/usuarios`, {
+        name,
+        menssage
+      })
+
       inputMenssage.current.value = ''
-    } catch {
-      toast.error('Erro ao enviar')
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao enviar mensagem')
     }
   }
 
+  // 🗑 APAGAR MENSAGEM (SÓ O AUTOR)
   async function deleteUsers(id) {
     try {
       await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
         data: { name }
       })
-      getUsers()
     } catch (err) {
       console.error(err)
-      toast.error('Erro ao deletar')
+      toast.error('Erro ao apagar mensagem')
     }
   }
 
+  // 🔌 SOCKET.IO
   useEffect(() => {
     getUsers()
 
     socketRef.current = io(BACKEND_URL)
-    socketRef.current.on('nova_mensagem', getUsers)
+
+    socketRef.current.on('nova_mensagem', msg => {
+      setUsers(prev => [...prev, msg])
+    })
+
+    socketRef.current.on('mensagem_apagada', id => {
+      setUsers(prev => prev.filter(m => m.id !== id))
+    })
 
     return () => socketRef.current.disconnect()
   }, [])
 
+  // ⬇️ SCROLL AUTOMÁTICO
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [users])
@@ -98,7 +115,6 @@ function Home() {
               key={user.id}
               className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
             >
-              {/* 🔹 BALÃO + LIXEIRA */}
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
                   {!isMine && (
@@ -108,7 +124,6 @@ function Home() {
                   <span className="text">{user.menssage}</span>
                 </div>
 
-                {/* 🗑 Lixeira fora do balão */}
                 {isMine && (
                   <button
                     className="delete"
@@ -120,7 +135,7 @@ function Home() {
                 )}
               </div>
 
-              {/* ⏰ HORA FIXA (createdAt do banco) */}
+              {/* ⏰ HORA FIXA DO BANCO */}
               <span className={`time ${isMine ? 'mine' : 'other'}`}>
                 {new Date(user.createdAt).toLocaleTimeString('pt-BR', {
                   hour: '2-digit',
@@ -143,7 +158,7 @@ function Home() {
             placeholder="Digite seu nome"
           />
           <button className="cadastrar" onClick={cadastrarNome}>
-            CADASTRAR
+            ENTRAR
           </button>
         </>
       ) : (
@@ -152,6 +167,7 @@ function Home() {
             className="menssage"
             ref={inputMenssage}
             placeholder="Digite sua mensagem"
+            onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
           />
           <button className="enviar" onClick={enviarMensagem}>
             ENVIAR
@@ -163,3 +179,4 @@ function Home() {
 }
 
 export default Home
+
