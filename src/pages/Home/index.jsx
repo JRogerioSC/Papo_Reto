@@ -87,7 +87,7 @@ function Home() {
     <div className="container">
       <ToastContainer />
 
-      {/* 🔹 CHAT */}
+      {/* 💬 CHAT */}
       <div className="chat">
         {users.map(user => {
           const isMine =
@@ -96,42 +96,45 @@ function Home() {
           return (
             <div
               key={user.id}
-              className={`card ${isMine ? 'mine' : 'other'}`}
+              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
             >
-              <div className="message-content">
-                {!isMine && (
-                  <span className="user-name">{user.name}</span>
+              {/* 🔹 BALÃO + LIXEIRA */}
+              <div className="bubble-row">
+                <div className={`card ${isMine ? 'mine' : 'other'}`}>
+                  {!isMine && (
+                    <span className="user-name">{user.name}</span>
+                  )}
+
+                  <span className="text">{user.menssage}</span>
+                </div>
+
+                {/* 🗑 Lixeira fora do balão */}
+                {isMine && (
+                  <button
+                    className="delete"
+                    onClick={() => deleteUsers(user.id)}
+                    title="Apagar mensagem"
+                  >
+                    🗑
+                  </button>
                 )}
-
-                <span className="text">{user.menssage}</span>
-
-                <span className="time">
-                  {new Date(
-                    user.createdAt || Date.now()
-                  ).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
               </div>
 
-              {/* 🗑 Lixeira */}
-              {isMine && (
-                <button
-                  className="delete"
-                  onClick={() => deleteUsers(user.id)}
-                  title="Apagar mensagem"
-                >
-                  🗑
-                </button>
-              )}
+              {/* ⏰ HORA FIXA (createdAt do banco) */}
+              <span className={`time ${isMine ? 'mine' : 'other'}`}>
+                {new Date(user.createdAt).toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
             </div>
           )
         })}
+
         <div ref={scrollRef} />
       </div>
 
-      {/* 🔹 INPUTS */}
+      {/* ⌨️ INPUTS */}
       {!cadastrado ? (
         <>
           <input

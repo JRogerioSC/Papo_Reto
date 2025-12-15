@@ -1,4 +1,4 @@
-/* CHAT */
+/* ================= CHAT ================= */
 .chat {
   display: flex;
   flex-direction: column;
@@ -6,9 +6,26 @@
   gap: 6px;
 }
 
-/* BOLHA */
-.card {
+/* ============ WRAPPER (BALÃO + HORA) ============ */
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
   max-width: 90%;
+}
+
+.message-wrapper.mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.message-wrapper.other {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+/* ================= BALÃO ================= */
+.card {
+  width: fit-content;
   padding: 10px 14px;
   border-radius: 14px;
   font-size: 14px;
@@ -16,10 +33,8 @@
   animation: fadeIn 0.15s ease-in;
 }
 
-/* ENVIADA */
+/* -------- MENSAGEM ENVIADA -------- */
 .card.mine {
-  align-self: flex-end;
-  margin-left: auto;
   background-color: #dcf8c6;
   border-bottom-right-radius: 4px;
 }
@@ -34,10 +49,8 @@
   border-top: 6px solid transparent;
 }
 
-/* RECEBIDA */
+/* -------- MENSAGEM RECEBIDA -------- */
 .card.other {
-  align-self: flex-start;
-  margin-right: auto;
   background-color: #ffffff;
   border-bottom-left-radius: 4px;
 }
@@ -52,7 +65,7 @@
   border-top: 6px solid transparent;
 }
 
-/* NOME */
+/* ================= NOME ================= */
 .user-name {
   font-size: 12px;
   font-weight: bold;
@@ -61,22 +74,28 @@
   display: block;
 }
 
-/* TEXTO */
+/* ================= TEXTO ================= */
 .text {
   display: block;
   line-height: 1.4;
 }
 
-/* HORA */
+/* ================= HORA (FORA DO BALÃO) ================= */
 .time {
-  display: block;
   font-size: 11px;
   color: #666;
-  text-align: right;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
-/* DELETE */
+.time.mine {
+  margin-right: 8px;
+}
+
+.time.other {
+  margin-left: 8px;
+}
+
+/* ================= DELETE ================= */
 .delete {
   position: absolute;
   top: 4px;
@@ -87,7 +106,7 @@
   font-size: 12px;
 }
 
-/* ANIMAÇÃO */
+/* ================= ANIMAÇÃO ================= */
 @keyframes fadeIn {
   from {
     opacity: 0;

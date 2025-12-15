@@ -1,11 +1,9 @@
 /* =====================
    CONTAINER
 ===================== */
-
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   height: 100vh;
   padding: 12px;
   background-color: #ece5dd;
@@ -14,7 +12,6 @@
 /* =====================
    CHAT
 ===================== */
-
 .chat {
   display: flex;
   flex-direction: column;
@@ -25,84 +22,117 @@
 }
 
 /* =====================
-   BOLHAS DE MENSAGEM
+   WRAPPER (BALÃO + HORA)
 ===================== */
-
-.card {
+.message-wrapper {
   display: flex;
-  align-items: flex-end;
-  gap: 6px;
+  flex-direction: column;
   max-width: 80%;
 }
 
-/* 📤 ENVIADAS (DIREITA) */
-.card.mine {
+.message-wrapper.mine {
   align-self: flex-end;
+  align-items: flex-end;
 }
 
-/* 📥 RECEBIDAS (ESQUERDA) */
-.card.other {
+.message-wrapper.other {
   align-self: flex-start;
+  align-items: flex-start;
 }
 
 /* =====================
-   CONTEÚDO DA MENSAGEM
+   BALÃO
 ===================== */
-
-.message-content {
-  display: flex;
-  flex-direction: column;
+.card {
+  position: relative;
   padding: 8px 12px;
   border-radius: 12px;
-  word-wrap: break-word;
   font-size: 14px;
+  word-wrap: break-word;
+  animation: fadeIn 0.15s ease-in;
 }
 
-/* Enviadas */
-.card.mine .message-content {
+/* 📤 ENVIADAS */
+.card.mine {
   background-color: #dcf8c6;
   border-bottom-right-radius: 4px;
-  text-align: right;
 }
 
-/* Recebidas */
-.card.other .message-content {
+/* SETA ENVIADA */
+.card.mine::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  border-left: 6px solid #dcf8c6;
+  border-top: 6px solid transparent;
+}
+
+/* 📥 RECEBIDAS */
+.card.other {
   background-color: #ffffff;
   border-bottom-left-radius: 4px;
-  text-align: left;
 }
 
-/* Nome do usuário (somente recebidas) */
+/* SETA RECEBIDA */
+.card.other::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  bottom: 0;
+  border-right: 6px solid #ffffff;
+  border-top: 6px solid transparent;
+}
+
+/* =====================
+   NOME DO USUÁRIO
+===================== */
 .user-name {
   font-size: 12px;
   font-weight: bold;
   color: #128c7e;
   margin-bottom: 2px;
+  display: block;
 }
 
-/* Texto */
+/* =====================
+   TEXTO
+===================== */
 .text {
   font-size: 14px;
   color: #000;
+  line-height: 1.4;
+  display: block;
 }
 
-/* Hora */
+/* =====================
+   HORA (FORA DO BALÃO)
+===================== */
 .time {
   font-size: 11px;
   color: #667781;
-  align-self: flex-end;
-  margin-top: 4px;
+  margin-top: 3px;
+}
+
+.time.mine {
+  margin-right: 8px;
+}
+
+.time.other {
+  margin-left: 8px;
 }
 
 /* =====================
    BOTÃO LIXEIRA
 ===================== */
-
 .delete {
+  position: absolute;
+  top: 4px;
+  right: 6px;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.6;
 }
 
@@ -113,7 +143,6 @@
 /* =====================
    ÁREA DE DIGITAÇÃO
 ===================== */
-
 .input-area {
   display: flex;
   align-items: center;
@@ -124,10 +153,8 @@
 /* =====================
    INPUTS
 ===================== */
-
 .menssage {
   flex: 1;
-  /* 🔑 FAZ CABER AO LADO DO BOTÃO */
   border: none;
   border-radius: 20px;
   height: 44px;
@@ -148,7 +175,6 @@
 /* =====================
    BOTÕES
 ===================== */
-
 .enviar {
   background-color: #128c7e;
   color: #fff;
@@ -177,4 +203,19 @@
 
 .cadastrar:hover {
   opacity: 0.9;
+}
+
+/* =====================
+   ANIMAÇÃO
+===================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
