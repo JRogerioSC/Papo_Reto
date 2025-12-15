@@ -94,7 +94,7 @@ function Home() {
 
           return (
             <div
-              key={user.id}
+              key={user._id}                 // ✅ CORRIGIDO
               className={`card ${isMine ? 'mine' : 'other'}`}
             >
               {/* Conteúdo da mensagem */}
@@ -115,11 +115,11 @@ function Home() {
                 </span>
               </div>
 
-              {/* Lixeira (somente mensagens enviadas) */}
+              {/* 🗑 Lixeira (somente mensagens enviadas) */}
               {isMine && (
                 <button
                   className="delete"
-                  onClick={() => deleteUsers(user.id)}
+                  onClick={() => deleteUsers(user._id)} // ✅ CORRIGIDO
                   title="Apagar mensagem"
                 >
                   🗑
