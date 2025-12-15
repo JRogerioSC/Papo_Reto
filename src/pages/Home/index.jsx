@@ -115,7 +115,7 @@ function Home() {
                 </span>
               </div>
 
-              {/* 🗑 Lixeira (somente mensagens do autor) */}
+              {/* 🗑 Lixeira */}
               {isMine && (
                 <button
                   className="delete"
@@ -144,7 +144,7 @@ function Home() {
           </button>
         </>
       ) : (
-        <>
+        <div className="input-area">
           <input
             className="menssage"
             ref={inputMenssage}
@@ -153,7 +153,7 @@ function Home() {
           <button className="enviar" onClick={enviarMensagem}>
             ENVIAR
           </button>
-        </>
+        </div>
       )}
     </div>
   )

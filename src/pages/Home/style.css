@@ -38,13 +38,11 @@
 /* 📤 ENVIADAS (DIREITA) */
 .card.mine {
   align-self: flex-end;
-  flex-direction: row;
 }
 
 /* 📥 RECEBIDAS (ESQUERDA) */
 .card.other {
   align-self: flex-start;
-  flex-direction: row;
 }
 
 /* =====================
@@ -113,18 +111,29 @@
 }
 
 /* =====================
+   ÁREA DE DIGITAÇÃO
+===================== */
+
+.input-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* =====================
    INPUTS
 ===================== */
 
 .menssage {
+  flex: 1;
+  /* 🔑 FAZ CABER AO LADO DO BOTÃO */
   border: none;
   border-radius: 20px;
   height: 44px;
   padding: 12px 15px;
-  width: 100%;
   outline: none;
   background-color: #fff;
-  margin-top: 8px;
 }
 
 .nome {
@@ -141,15 +150,15 @@
 ===================== */
 
 .enviar {
-  align-self: flex-end;
-  margin-top: 8px;
   background-color: #128c7e;
   color: #fff;
   border: none;
   border-radius: 20px;
-  padding: 10px 18px;
+  height: 44px;
+  padding: 0 18px;
   font-weight: bold;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .enviar:hover {
