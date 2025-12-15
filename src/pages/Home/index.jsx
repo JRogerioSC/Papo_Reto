@@ -8,9 +8,6 @@ import { register } from './serviceWorkerRegistration'
 
 register()
 
-const PUBLIC_VAPID_KEY =
-  'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
-
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
 function Home() {
@@ -61,7 +58,9 @@ function Home() {
 
   async function deleteUsers(id) {
     try {
-      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
+        data: { name }
+      })
       getUsers()
     } catch {
       toast.error('Erro ao deletar')
@@ -96,11 +95,27 @@ function Home() {
               key={user.id}
               className={`card ${isMine ? 'mine' : 'other'}`}
             >
-              <p className="user-name">{user.name}</p>
+              {/* nome só nas recebidas */}
+              {!isMine && (
+                <span className="user-name">{user.name}</span>
+              )}
+
               <span className="text">{user.menssage}</span>
 
+              <span className="time">
+                {new Date(user.createdAt || Date.now()).toLocaleTimeString(
+                  'pt-BR',
+                  { hour: '2-digit', minute: '2-digit' }
+                )}
+              </span>
+
               {isMine && (
-                <button onClick={() => deleteUsers(user.id)}>🗑</button>
+                <button
+                  className="delete"
+                  onClick={() => deleteUsers(user.id)}
+                >
+                  🗑
+                </button>
               )}
             </div>
           )
