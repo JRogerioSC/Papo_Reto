@@ -1,12 +1,22 @@
-# React + Vite
+<h1>Papo_Reto</h1>
+<br>
+<br>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<h4>Observação :</h4>
+Esse Site é de bate-papo, semelhante ao WhatsApp, criei com conhecimento adquirido em outros projetos, e claro com a ajudinha da IA.
 
-Currently, two official plugins are available:
+Site: https://pap0reto.netlify.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<h3>Tecnologias Ultilizadas:</h3>
+<br>
+<p> - HTML <p/>
+<p> - CSS <p/>
+<p> - JavaScript <p/>
+<p> - Node.Js <p/>
+<p> - MongoDB <p/>
+<p> - React.Js <p/>
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+<img src="https://i.postimg.cc/fWcPSpHd/IMG-20251020-WA0115.jpg" />
+<br>
+<br>
+<img src="https://i.postimg.cc/Wz566Gqs/IMG-20251020-WA0114.jpg" />
