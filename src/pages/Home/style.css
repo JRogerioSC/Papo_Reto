@@ -22,11 +22,19 @@
 /* ===================== BUBBLE ROW ===================== */
 .bubble-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 6px;
 }
 
-/* ===================== WRAPPER (BALÃO + HORA) ===================== */
+.bubble-row.mine {
+  justify-content: flex-end;
+}
+
+.bubble-row.other {
+  justify-content: flex-start;
+}
+
+/* ===================== WRAPPER ===================== */
 .message-wrapper {
   display: flex;
   flex-direction: column;
@@ -88,7 +96,6 @@
   color: #128c7e;
   margin-bottom: 3px;
   display: block;
-  text-transform: capitalize;
 }
 
 /* ===================== TEXTO ===================== */
@@ -118,8 +125,9 @@
   border: none;
   cursor: pointer;
   font-size: 14px;
-  flex-shrink: 0;
   color: #666;
+  display: flex;
+  align-items: center;
 }
 
 .delete:hover {
@@ -164,11 +172,6 @@
   padding: 0 18px;
   font-weight: bold;
   cursor: pointer;
-  white-space: nowrap;
-}
-
-.enviar:hover {
-  opacity: 0.9;
 }
 
 .cadastrar {
@@ -182,11 +185,7 @@
   width: 100%;
 }
 
-.cadastrar:hover {
-  opacity: 0.9;
-}
-
-/* ===================== TELA DE CADASTRO CENTRALIZADA ===================== */
+/* ===================== CADASTRO ===================== */
 .register-container {
   display: flex;
   flex-direction: column;

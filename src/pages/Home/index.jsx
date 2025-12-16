@@ -20,6 +20,10 @@ function Home() {
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
+  function capitalizarNome(nome) {
+    return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase()
+  }
+
   function resetarUsuario() {
     localStorage.removeItem('username')
     socketRef.current?.disconnect()
@@ -31,7 +35,9 @@ function Home() {
   useEffect(() => {
     const savedName = localStorage.getItem('username')
     if (!savedName) return
-    axios.get(`${BACKEND_URL}/usuarios/validar/${savedName}`)
+
+    axios
+      .get(`${BACKEND_URL}/usuarios/validar/${savedName}`)
       .then(() => {
         setName(savedName)
         setCadastrado(true)
@@ -45,8 +51,11 @@ function Home() {
   }
 
   async function cadastrarNome() {
-    const nome = inputName.current.value.trim()
+    let nome = inputName.current.value.trim()
     if (!nome) return toast.warning('Digite um nome válido')
+
+    nome = capitalizarNome(nome)
+
     await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
     localStorage.setItem('username', nome)
     setName(nome)
@@ -57,8 +66,12 @@ function Home() {
   async function enviarMensagem() {
     const text = inputMessage.current.value.trim()
     if (!text) return
+
     try {
-      await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage: text })
+      await axios.post(`${BACKEND_URL}/usuarios`, {
+        name,
+        menssage: text
+      })
       inputMessage.current.value = ''
     } catch {
       resetarUsuario()
@@ -66,16 +79,27 @@ function Home() {
   }
 
   async function deleteMessage(id) {
-    await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
+    await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
+      data: { name }
+    })
   }
 
   useEffect(() => {
     if (!cadastrado) return
+
     getMessages()
+
     socketRef.current = io(BACKEND_URL)
     socketRef.current.emit('register', name)
-    socketRef.current.on('nova_mensagem', msg => setMessages(prev => [...prev, msg]))
-    socketRef.current.on('mensagem_apagada', id => setMessages(prev => prev.filter(m => m.id !== id)))
+
+    socketRef.current.on('nova_mensagem', msg =>
+      setMessages(prev => [...prev, msg])
+    )
+
+    socketRef.current.on('mensagem_apagada', id =>
+      setMessages(prev => prev.filter(m => m.id !== id))
+    )
+
     return () => socketRef.current.disconnect()
   }, [cadastrado])
 
@@ -90,7 +114,9 @@ function Home() {
         <div className="register-container">
           <h2>Papo Reto</h2>
           <input ref={inputName} className="nome" placeholder="Digite seu nome" />
-          <button className="cadastrar" onClick={cadastrarNome}>ENTRAR</button>
+          <button className="cadastrar" onClick={cadastrarNome}>
+            ENTRAR
+          </button>
         </div>
       </div>
     )
@@ -99,22 +125,41 @@ function Home() {
   return (
     <div className="container">
       <ToastContainer />
+
       <div className="chat">
         {messages.map(msg => {
           const isMine = msg.name.toLowerCase() === name.toLowerCase()
+
           return (
-            <div key={msg.id} className={`message-wrapper ${isMine ? 'mine' : 'other'}`}>
-              <div className="bubble-row">
+            <div
+              key={msg.id}
+              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+            >
+              <div className={`bubble-row ${isMine ? 'mine' : 'other'}`}>
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
-                  {!isMine && <span className="user-name">{msg.name.charAt(0).toUpperCase() + msg.name.slice(1)}</span>}
+                  {!isMine && (
+                    <span className="user-name">
+                      {capitalizarNome(msg.name)}
+                    </span>
+                  )}
                   <span className="text">{msg.text}</span>
                 </div>
+
                 {isMine && (
-                  <button className="delete" onClick={() => deleteMessage(msg.id)}>🗑</button>
+                  <button
+                    className="delete"
+                    onClick={() => deleteMessage(msg.id)}
+                  >
+                    🗑
+                  </button>
                 )}
               </div>
+
               <span className={`time ${isMine ? 'mine' : 'other'}`}>
-                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
               </span>
             </div>
           )
@@ -129,13 +174,14 @@ function Home() {
           placeholder="Digite sua mensagem"
           onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
         />
-        <button className="enviar" onClick={enviarMensagem}>ENVIAR</button>
+        <button className="enviar" onClick={enviarMensagem}>
+          ENVIAR
+        </button>
       </div>
     </div>
   )
 }
 
 export default Home
-
 
 
