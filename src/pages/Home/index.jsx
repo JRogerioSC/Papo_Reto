@@ -11,57 +11,63 @@ register()
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
 function Home() {
-  const [users, setUsers] = useState([])
+  const [messages, setMessages] = useState([])
   const [name, setName] = useState('')
   const [cadastrado, setCadastrado] = useState(false)
 
   const inputName = useRef(null)
-  const inputMenssage = useRef(null)
+  const inputMessage = useRef(null)
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
   // 🔄 BUSCAR MENSAGENS
-  async function getUsers() {
+  async function getMessages() {
     try {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
-      const valid = res.data.filter(
-        m => m.createdAt && m.name && m.menssage
-      )
-      setUsers(valid)
+      setMessages(res.data)
     } catch {
       toast.error('Erro ao carregar mensagens')
     }
   }
 
-  // 👤 ENTRAR (CADASTRO LOCAL)
-  function cadastrarNome() {
+  // 👤 CADASTRAR USUÁRIO (BACKEND REAL)
+  async function cadastrarNome() {
     const nome = inputName.current.value.trim()
+    if (!nome) return toast.warning('Digite um nome válido')
 
-    if (!nome) {
-      return toast.warning('Digite um nome válido')
+    try {
+      await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, {
+        name: nome
+      })
+
+      localStorage.setItem('username', nome)
+      setName(nome)
+      setCadastrado(true)
+      toast.success('Bem-vindo!')
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Erro ao cadastrar')
     }
-
-    localStorage.setItem('username', nome)
-    setName(nome)
-    setCadastrado(true)
-    toast.success('Bem-vindo!')
   }
 
   // 📤 ENVIAR MENSAGEM
   async function enviarMensagem() {
-    const menssage = inputMenssage.current.value.trim()
-    if (!menssage) return
+    const text = inputMessage.current.value.trim()
+    if (!text) return
 
     try {
-      await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage })
-      inputMenssage.current.value = ''
+      await axios.post(`${BACKEND_URL}/usuarios`, {
+        name,
+        menssage: text
+      })
+
+      inputMessage.current.value = ''
     } catch (err) {
       toast.error(err.response?.data?.error || 'Erro ao enviar')
     }
   }
 
-  // 🗑 APAGAR
-  async function deleteUsers(id) {
+  // 🗑 APAGAR MENSAGEM
+  async function deleteMessage(id) {
     try {
       await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
         data: { name }
@@ -71,33 +77,32 @@ function Home() {
     }
   }
 
-  // 🔌 SOCKET (SÓ APÓS CADASTRO)
+  // 🔌 SOCKET
   useEffect(() => {
     if (!cadastrado) return
 
-    getUsers()
+    getMessages()
 
     socketRef.current = io(BACKEND_URL)
+    socketRef.current.emit('register', name)
 
     socketRef.current.on('nova_mensagem', msg => {
-      if (msg?.createdAt) {
-        setUsers(prev => [...prev, msg])
-      }
+      setMessages(prev => [...prev, msg])
     })
 
     socketRef.current.on('mensagem_apagada', id => {
-      setUsers(prev => prev.filter(m => m.id !== id))
+      setMessages(prev => prev.filter(m => m.id !== id))
     })
 
     return () => socketRef.current.disconnect()
   }, [cadastrado])
 
-  // ⬇️ SCROLL
+  // ⬇️ SCROLL AUTOMÁTICO
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [users])
+  }, [messages])
 
-  // 🚪 SE NÃO CADASTRADO → TELA DE CADASTRO (RETORNO IMEDIATO)
+  // 🚪 TELA DE CADASTRO
   if (!cadastrado) {
     return (
       <div className="container">
@@ -107,8 +112,8 @@ function Home() {
           <h2>Papo Reto</h2>
 
           <input
-            className="nome"
             ref={inputName}
+            className="nome"
             placeholder="Digite seu nome"
           />
 
@@ -126,25 +131,27 @@ function Home() {
       <ToastContainer />
 
       <div className="chat">
-        {users.map(user => {
+        {messages.map(msg => {
           const isMine =
-            user.name.toLowerCase() === name.toLowerCase()
+            msg.name.toLowerCase() === name.toLowerCase()
 
           return (
             <div
-              key={user.id}
+              key={msg.id}
               className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
             >
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
-                  {!isMine && <span className="user-name">{user.name}</span>}
-                  <span className="text">{user.menssage}</span>
+                  {!isMine && (
+                    <span className="user-name">{msg.name}</span>
+                  )}
+                  <span className="text">{msg.text}</span>
                 </div>
 
                 {isMine && (
                   <button
                     className="delete"
-                    onClick={() => deleteUsers(user.id)}
+                    onClick={() => deleteMessage(msg.id)}
                   >
                     🗑
                   </button>
@@ -152,7 +159,7 @@ function Home() {
               </div>
 
               <span className={`time ${isMine ? 'mine' : 'other'}`}>
-                {new Date(user.createdAt).toLocaleTimeString('pt-BR', {
+                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
@@ -166,11 +173,12 @@ function Home() {
 
       <div className="input-area">
         <input
+          ref={inputMessage}
           className="menssage"
-          ref={inputMenssage}
           placeholder="Digite sua mensagem"
           onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
         />
+
         <button className="enviar" onClick={enviarMensagem}>
           ENVIAR
         </button>
