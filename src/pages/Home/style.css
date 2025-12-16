@@ -19,6 +19,13 @@
   padding-bottom: 10px;
 }
 
+/* ===================== BUBBLE ROW ===================== */
+.bubble-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
 /* ===================== WRAPPER (BALÃO + HORA) ===================== */
 .message-wrapper {
   display: flex;
@@ -82,7 +89,6 @@
   margin-bottom: 3px;
   display: block;
   text-transform: capitalize;
-  /* Primeira letra maiúscula */
 }
 
 /* ===================== TEXTO ===================== */
@@ -108,13 +114,16 @@
 
 /* ===================== DELETE ===================== */
 .delete {
-  position: absolute;
-  top: 4px;
-  right: 6px;
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  flex-shrink: 0;
+  color: #666;
+}
+
+.delete:hover {
+  color: #000;
 }
 
 /* ===================== INPUT AREA ===================== */
@@ -143,9 +152,7 @@
   outline: none;
   margin-bottom: 8px;
   text-align: center;
-  /* Centraliza o placeholder e o texto digitado */
 }
-
 
 /* ===================== BOTÕES ===================== */
 .enviar {

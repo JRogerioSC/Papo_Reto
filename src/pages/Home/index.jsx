@@ -28,20 +28,15 @@ function Home() {
     toast.info('Usuário removido. Cadastre-se novamente.')
   }
 
-  // 🔁 VALIDAR USUÁRIO AO RECARREGAR
   useEffect(() => {
     const savedName = localStorage.getItem('username')
     if (!savedName) return
-
-    axios
-      .get(`${BACKEND_URL}/usuarios/validar/${savedName}`)
+    axios.get(`${BACKEND_URL}/usuarios/validar/${savedName}`)
       .then(() => {
         setName(savedName)
         setCadastrado(true)
       })
-      .catch(() => {
-        resetarUsuario()
-      })
+      .catch(() => resetarUsuario())
   }, [])
 
   async function getMessages() {
@@ -52,9 +47,7 @@ function Home() {
   async function cadastrarNome() {
     const nome = inputName.current.value.trim()
     if (!nome) return toast.warning('Digite um nome válido')
-
     await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
-
     localStorage.setItem('username', nome)
     setName(nome)
     setCadastrado(true)
@@ -64,12 +57,8 @@ function Home() {
   async function enviarMensagem() {
     const text = inputMessage.current.value.trim()
     if (!text) return
-
     try {
-      await axios.post(`${BACKEND_URL}/usuarios`, {
-        name,
-        menssage: text
-      })
+      await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage: text })
       inputMessage.current.value = ''
     } catch {
       resetarUsuario()
@@ -77,27 +66,16 @@ function Home() {
   }
 
   async function deleteMessage(id) {
-    await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
-      data: { name }
-    })
+    await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
   }
 
   useEffect(() => {
     if (!cadastrado) return
-
     getMessages()
-
     socketRef.current = io(BACKEND_URL)
     socketRef.current.emit('register', name)
-
-    socketRef.current.on('nova_mensagem', msg =>
-      setMessages(prev => [...prev, msg])
-    )
-
-    socketRef.current.on('mensagem_apagada', id =>
-      setMessages(prev => prev.filter(m => m.id !== id))
-    )
-
+    socketRef.current.on('nova_mensagem', msg => setMessages(prev => [...prev, msg]))
+    socketRef.current.on('mensagem_apagada', id => setMessages(prev => prev.filter(m => m.id !== id)))
     return () => socketRef.current.disconnect()
   }, [cadastrado])
 
@@ -121,7 +99,6 @@ function Home() {
   return (
     <div className="container">
       <ToastContainer />
-
       <div className="chat">
         {messages.map(msg => {
           const isMine = msg.name.toLowerCase() === name.toLowerCase()
@@ -137,10 +114,7 @@ function Home() {
                 )}
               </div>
               <span className={`time ${isMine ? 'mine' : 'other'}`}>
-                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
           )
