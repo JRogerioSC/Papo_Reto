@@ -20,6 +20,16 @@ function Home() {
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
+  // 🔁 RESTAURA USUÁRIO AO RECARREGAR A PÁGINA
+  useEffect(() => {
+    const savedName = localStorage.getItem('username')
+
+    if (savedName) {
+      setName(savedName)
+      setCadastrado(true)
+    }
+  }, [])
+
   // 🔄 BUSCAR MENSAGENS
   async function getMessages() {
     try {
@@ -79,7 +89,7 @@ function Home() {
 
   // 🔌 SOCKET
   useEffect(() => {
-    if (!cadastrado) return
+    if (!cadastrado || !name) return
 
     getMessages()
 
@@ -95,7 +105,7 @@ function Home() {
     })
 
     return () => socketRef.current.disconnect()
-  }, [cadastrado])
+  }, [cadastrado, name])
 
   // ⬇️ SCROLL AUTOMÁTICO
   useEffect(() => {
@@ -188,4 +198,5 @@ function Home() {
 }
 
 export default Home
+
 
