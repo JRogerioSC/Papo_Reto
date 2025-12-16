@@ -129,13 +129,19 @@ function Home() {
             <div key={msg.id} className={`message-wrapper ${isMine ? 'mine' : 'other'}`}>
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
-                  {!isMine && <span className="user-name">{msg.name}</span>}
+                  {!isMine && <span className="user-name">{msg.name.charAt(0).toUpperCase() + msg.name.slice(1)}</span>}
                   <span className="text">{msg.text}</span>
                 </div>
                 {isMine && (
                   <button className="delete" onClick={() => deleteMessage(msg.id)}>🗑</button>
                 )}
               </div>
+              <span className={`time ${isMine ? 'mine' : 'other'}`}>
+                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
             </div>
           )
         })}
@@ -156,5 +162,6 @@ function Home() {
 }
 
 export default Home
+
 
 
