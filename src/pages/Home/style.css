@@ -1,29 +1,25 @@
-/* =====================
-   CONTAINER
-===================== */
+/* ===================== CONTAINER ===================== */
 .container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   padding: 12px;
   background-color: #ece5dd;
+  box-sizing: border-box;
 }
 
-/* =====================
-   CHAT
-===================== */
+/* ===================== CHAT ===================== */
 .chat {
   display: flex;
   flex-direction: column;
+  width: 100%;
   gap: 6px;
   overflow-y: auto;
   flex: 1;
   padding-bottom: 10px;
 }
 
-/* =====================
-   WRAPPER (BALÃO + HORA)
-===================== */
+/* ===================== WRAPPER (BALÃO + HORA) ===================== */
 .message-wrapper {
   display: flex;
   flex-direction: column;
@@ -40,25 +36,21 @@
   align-items: flex-start;
 }
 
-/* =====================
-   BALÃO
-===================== */
+/* ===================== BALÃO ===================== */
 .card {
-  position: relative;
-  padding: 8px 12px;
-  border-radius: 12px;
+  width: fit-content;
+  padding: 10px 14px;
+  border-radius: 14px;
   font-size: 14px;
-  word-wrap: break-word;
+  position: relative;
   animation: fadeIn 0.15s ease-in;
 }
 
-/* 📤 ENVIADAS */
 .card.mine {
   background-color: #dcf8c6;
   border-bottom-right-radius: 4px;
 }
 
-/* SETA ENVIADA */
 .card.mine::after {
   content: "";
   position: absolute;
@@ -68,13 +60,11 @@
   border-top: 6px solid transparent;
 }
 
-/* 📥 RECEBIDAS */
 .card.other {
   background-color: #ffffff;
   border-bottom-left-radius: 4px;
 }
 
-/* SETA RECEBIDA */
 .card.other::after {
   content: "";
   position: absolute;
@@ -84,33 +74,27 @@
   border-top: 6px solid transparent;
 }
 
-/* =====================
-   NOME DO USUÁRIO
-===================== */
+/* ===================== NOME ===================== */
 .user-name {
   font-size: 12px;
   font-weight: bold;
   color: #128c7e;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   display: block;
+  text-transform: capitalize;
+  /* Primeira letra maiúscula */
 }
 
-/* =====================
-   TEXTO
-===================== */
+/* ===================== TEXTO ===================== */
 .text {
-  font-size: 14px;
-  color: #000;
-  line-height: 1.4;
   display: block;
+  line-height: 1.4;
 }
 
-/* =====================
-   HORA (FORA DO BALÃO)
-===================== */
+/* ===================== HORA ===================== */
 .time {
   font-size: 11px;
-  color: #667781;
+  color: #666;
   margin-top: 3px;
 }
 
@@ -122,27 +106,18 @@
   margin-left: 8px;
 }
 
-/* =====================
-   BOTÃO LIXEIRA
-===================== */
+/* ===================== DELETE ===================== */
 .delete {
   position: absolute;
   top: 4px;
   right: 6px;
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 13px;
-  opacity: 0.6;
+  font-size: 12px;
 }
 
-.delete:hover {
-  opacity: 1;
-}
-
-/* =====================
-   ÁREA DE DIGITAÇÃO
-===================== */
+/* ===================== INPUT AREA ===================== */
 .input-area {
   display: flex;
   align-items: center;
@@ -150,9 +125,6 @@
   margin-top: 8px;
 }
 
-/* =====================
-   INPUTS
-===================== */
 .menssage {
   flex: 1;
   border: none;
@@ -170,11 +142,12 @@
   padding: 12px 15px;
   outline: none;
   margin-bottom: 8px;
+  text-align: center;
+  /* Centraliza o placeholder e o texto digitado */
 }
 
-/* =====================
-   BOTÕES
-===================== */
+
+/* ===================== BOTÕES ===================== */
 .enviar {
   background-color: #128c7e;
   color: #fff;
@@ -199,15 +172,37 @@
   padding: 10px 16px;
   border: none;
   cursor: pointer;
+  width: 100%;
 }
 
 .cadastrar:hover {
   opacity: 0.9;
 }
 
-/* =====================
-   ANIMAÇÃO
-===================== */
+/* ===================== TELA DE CADASTRO CENTRALIZADA ===================== */
+.register-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  background-color: #fff;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  max-width: 360px;
+  margin: auto;
+  text-align: center;
+}
+
+.register-container h2 {
+  margin-bottom: 24px;
+  color: #128c7e;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* ===================== ANIMAÇÃO ===================== */
 @keyframes fadeIn {
   from {
     opacity: 0;
