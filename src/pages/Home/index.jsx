@@ -10,6 +10,36 @@ register()
 
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
+/* ===================== */
+/* 🔔 PUSH SUBSCRIBE */
+/* ===================== */
+async function subscribePush(name) {
+  if (!('serviceWorker' in navigator)) return
+  if (!('PushManager' in window)) return
+
+  const permission = await Notification.requestPermission()
+  if (permission !== 'granted') return
+
+  const reg = await navigator.serviceWorker.ready
+
+  const existing = await reg.pushManager.getSubscription()
+  if (existing) return
+
+  const subscription = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey:
+      'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
+  })
+
+  await axios.post(`${BACKEND_URL}/subscribe`, {
+    name,
+    subscription
+  })
+}
+
+/* ===================== */
+/* 💬 HOME */
+/* ===================== */
 function Home() {
   const [messages, setMessages] = useState([])
   const [name, setName] = useState('')
@@ -60,6 +90,9 @@ function Home() {
     localStorage.setItem('username', nome)
     setName(nome)
     setCadastrado(true)
+
+    await subscribePush(nome)
+
     toast.success('Bem-vindo!')
   }
 
@@ -88,6 +121,7 @@ function Home() {
     if (!cadastrado) return
 
     getMessages()
+    subscribePush(name)
 
     socketRef.current = io(BACKEND_URL)
     socketRef.current.emit('register', name)
@@ -135,7 +169,7 @@ function Home() {
               key={msg.id}
               className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
             >
-              <div className={`bubble-row ${isMine ? 'mine' : 'other'}`}>
+              <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
                   {!isMine && (
                     <span className="user-name">
