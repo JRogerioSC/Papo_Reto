@@ -21,7 +21,6 @@ async function subscribePush(name) {
   if (permission !== 'granted') return
 
   const reg = await navigator.serviceWorker.ready
-
   const existing = await reg.pushManager.getSubscription()
   if (existing) return
 
@@ -44,6 +43,7 @@ function Home() {
   const [messages, setMessages] = useState([])
   const [name, setName] = useState('')
   const [cadastrado, setCadastrado] = useState(false)
+  const [conectando, setConectando] = useState(true)
 
   const inputName = useRef(null)
   const inputMessage = useRef(null)
@@ -62,9 +62,15 @@ function Home() {
     toast.info('Usuário removido. Cadastre-se novamente.')
   }
 
+  /* ===================== */
+  /* 🔄 VALIDAR USUÁRIO */
+  /* ===================== */
   useEffect(() => {
     const savedName = localStorage.getItem('username')
-    if (!savedName) return
+    if (!savedName) {
+      setConectando(false)
+      return
+    }
 
     axios
       .get(`${BACKEND_URL}/usuarios/validar/${savedName}`)
@@ -73,6 +79,7 @@ function Home() {
         setCadastrado(true)
       })
       .catch(() => resetarUsuario())
+      .finally(() => setConectando(false))
   }, [])
 
   async function getMessages() {
@@ -92,7 +99,6 @@ function Home() {
     setCadastrado(true)
 
     await subscribePush(nome)
-
     toast.success('Bem-vindo!')
   }
 
@@ -117,13 +123,24 @@ function Home() {
     })
   }
 
+  /* ===================== */
+  /* 🔌 SOCKET + MENSAGENS */
+  /* ===================== */
   useEffect(() => {
     if (!cadastrado) return
 
-    getMessages()
-    subscribePush(name)
+    setConectando(true)
 
-    socketRef.current = io(BACKEND_URL)
+    Promise.all([
+      getMessages(),
+      subscribePush(name)
+    ]).finally(() => setConectando(false))
+
+    socketRef.current = io(BACKEND_URL, {
+      transports: ['websocket'],
+      reconnection: true
+    })
+
     socketRef.current.emit('register', name)
 
     socketRef.current.on('nova_mensagem', msg =>
@@ -141,6 +158,25 @@ function Home() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  /* ===================== */
+  /* 🔄 LOADING */
+  /* ===================== */
+  if (conectando) {
+    return (
+      <div className="container">
+        <ToastContainer />
+        <div className="loading">
+          <div className="spinner"></div>
+          <h2>Conectando com o servidor...</h2>
+          <p>Aguarde um instante</p>
+        </div>
+      </div>
+    )
+  }
+
+  /* ===================== */
+  /* 📝 CADASTRO */
+  /* ===================== */
   if (!cadastrado) {
     return (
       <div className="container">
@@ -156,6 +192,9 @@ function Home() {
     )
   }
 
+  /* ===================== */
+  /* 💬 CHAT */
+  /* ===================== */
   return (
     <div className="container">
       <ToastContainer />
@@ -217,6 +256,3 @@ function Home() {
 }
 
 export default Home
-
-
-
