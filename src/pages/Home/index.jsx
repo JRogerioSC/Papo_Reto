@@ -167,7 +167,7 @@ function Home() {
         <ToastContainer />
         <div className="loading">
           <div className="spinner"></div>
-          <h2>Conectando com o servidor...</h2>
+          <h2>Conectando ao servidor...</h2>
           <p>Aguarde um instante</p>
         </div>
       </div>
