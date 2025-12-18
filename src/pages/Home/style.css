@@ -16,22 +16,6 @@
   gap: 6px;
   overflow-y: auto;
   flex: 1;
-  padding-bottom: 10px;
-}
-
-/* ===================== BUBBLE ROW ===================== */
-.bubble-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bubble-row.mine {
-  justify-content: flex-end;
-}
-
-.bubble-row.other {
-  justify-content: flex-start;
 }
 
 /* ===================== WRAPPER ===================== */
@@ -43,22 +27,28 @@
 
 .message-wrapper.mine {
   align-self: flex-end;
-  align-items: flex-end;
 }
 
 .message-wrapper.other {
   align-self: flex-start;
-  align-items: flex-start;
 }
+
+/* ===================== BUBBLE ROW ===================== */
+.bubble-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* espaço entre mensagem e lixeira */
+}
+
 
 /* ===================== BALÃO ===================== */
 .card {
-  width: fit-content;
+  max-width: 100%;
   padding: 10px 14px;
   border-radius: 14px;
   font-size: 14px;
-  position: relative;
-  animation: fadeIn 0.15s ease-in;
+  word-break: break-word;
 }
 
 .card.mine {
@@ -66,27 +56,31 @@
   border-bottom-right-radius: 4px;
 }
 
-.card.mine::after {
-  content: "";
-  position: absolute;
-  right: -6px;
-  bottom: 0;
-  border-left: 6px solid #dcf8c6;
-  border-top: 6px solid transparent;
-}
-
 .card.other {
   background-color: #ffffff;
   border-bottom-left-radius: 4px;
 }
 
-.card.other::after {
-  content: "";
-  position: absolute;
-  left: -6px;
-  bottom: 0;
-  border-right: 6px solid #ffffff;
-  border-top: 6px solid transparent;
+/* ===================== DELETE ===================== */
+.delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  opacity: 0.6;
+  padding: 0px;
+  display: flex;
+  align-items: center;
+}
+
+.delete:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+
+.delete:active {
+  transform: scale(1.2);
 }
 
 /* ===================== NOME ===================== */
@@ -94,13 +88,12 @@
   font-size: 12px;
   font-weight: bold;
   color: #128c7e;
-  margin-bottom: 3px;
   display: block;
+  margin-bottom: 3px;
 }
 
 /* ===================== TEXTO ===================== */
 .text {
-  display: block;
   line-height: 1.4;
 }
 
@@ -111,148 +104,30 @@
   margin-top: 3px;
 }
 
-.time.mine {
-  margin-right: 8px;
-}
-
-.time.other {
-  margin-left: 8px;
-}
-
-/* ===================== DELETE ===================== */
-.delete {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  color: #666;
-  display: flex;
-  align-items: center;
-}
-
-.delete:hover {
-  color: #000;
-}
-
-/* ===================== INPUT AREA ===================== */
+/* ===================== INPUT ===================== */
 .input-area {
   display: flex;
-  align-items: center;
   gap: 8px;
   margin-top: 8px;
 }
 
 .menssage {
   flex: 1;
-  border: none;
   border-radius: 20px;
-  height: 44px;
-  padding: 12px 15px;
+  padding: 12px;
+  border: none;
   outline: none;
-  background-color: #fff;
 }
 
-.nome {
-  border: none;
-  border-radius: 20px;
-  height: 40px;
-  padding: 12px 15px;
-  outline: none;
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-/* ===================== BOTÕES ===================== */
 .enviar {
-  background-color: #128c7e;
+  background: #128c7e;
   color: #fff;
-  border: none;
   border-radius: 20px;
-  height: 44px;
-  padding: 0 18px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.cadastrar {
-  margin-top: 8px;
-  background-color: #075e54;
-  border-radius: 20px;
-  color: #fff;
-  padding: 10px 16px;
+  padding: 0 10px;
   border: none;
+}
+
+.enviar:hover {
   cursor: pointer;
-  width: 100%;
-}
-
-/* ===================== CADASTRO ===================== */
-.register-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  background-color: #fff;
-  padding: 40px 30px;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  max-width: 360px;
-  margin: auto;
-  text-align: center;
-}
-
-.register-container h2 {
-  margin-bottom: 24px;
-  color: #128c7e;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-/* ===================== ANIMAÇÃO ===================== */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.loading {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #444;
-  text-align: center;
-}
-
-.loading h2 {
-  margin-top: 15px;
-  font-size: 22px;
-}
-
-.loading p {
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-/* Spinner */
-.spinner {
-  width: 45px;
-  height: 45px;
-  border: 5px solid #ddd;
-  border-top: 5px solid #4caf50;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  color: #68ca1c;
 }
