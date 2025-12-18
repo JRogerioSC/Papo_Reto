@@ -16,6 +16,11 @@ function Home() {
   const [cadastrado, setCadastrado] = useState(false)
   const [conectando, setConectando] = useState(true)
 
+  // 🎙️ ÁUDIO
+  const [gravando, setGravando] = useState(false)
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+
   const inputName = useRef(null)
   const inputMessage = useRef(null)
   const scrollRef = useRef(null)
@@ -25,47 +30,37 @@ function Home() {
     return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase()
   }
 
-  function resetarUsuario() {
-    localStorage.removeItem('username')
-    socketRef.current?.disconnect()
-    setName('')
-    setCadastrado(false)
-    toast.info('Usuário removido. Cadastre-se novamente.')
-  }
+  async function iniciarGravacao() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
 
-  useEffect(() => {
-    const savedName = localStorage.getItem('username')
-    if (!savedName) {
-      setConectando(false)
-      return
+      mediaRecorderRef.current = new MediaRecorder(stream)
+      audioChunksRef.current = []
+
+      mediaRecorderRef.current.ondataavailable = e => {
+        audioChunksRef.current.push(e.data)
+      }
+
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: 'audio/webm'
+        })
+
+        console.log('🎧 Áudio gravado:', audioBlob)
+        toast.success('Áudio gravado! (pronto para enviar)')
+        // 👉 NO PRÓXIMO PASSO vamos enviar pro backend
+      }
+
+      mediaRecorderRef.current.start()
+      setGravando(true)
+    } catch {
+      toast.error('Permissão de microfone negada')
     }
-
-    axios
-      .get(`${BACKEND_URL}/usuarios/validar/${savedName}`)
-      .then(() => {
-        setName(savedName)
-        setCadastrado(true)
-      })
-      .catch(() => resetarUsuario())
-      .finally(() => setConectando(false))
-  }, [])
-
-  async function getMessages() {
-    const res = await axios.get(`${BACKEND_URL}/usuarios`)
-    setMessages(res.data)
   }
 
-  async function cadastrarNome() {
-    let nome = inputName.current.value.trim()
-    if (!nome) return toast.warning('Digite um nome válido')
-
-    nome = capitalizarNome(nome)
-
-    await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, { name: nome })
-    localStorage.setItem('username', nome)
-    setName(nome)
-    setCadastrado(true)
-    toast.success('Bem-vindo!')
+  function pararGravacao() {
+    mediaRecorderRef.current.stop()
+    setGravando(false)
   }
 
   async function enviarMensagem() {
@@ -80,57 +75,12 @@ function Home() {
     inputMessage.current.value = ''
   }
 
-  async function deleteMessage(id) {
-    await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
-      data: { name }
-    })
-  }
-
-  useEffect(() => {
-    if (!cadastrado) return
-
-    getMessages()
-
-    socketRef.current = io(BACKEND_URL, {
-      transports: ['websocket']
-    })
-
-    socketRef.current.on('nova_mensagem', msg => {
-      setMessages(prev => [...prev, msg])
-    })
-
-    socketRef.current.on('mensagem_apagada', id => {
-      setMessages(prev => prev.filter(m => m.id !== id))
-    })
-
-    return () => socketRef.current.disconnect()
-  }, [cadastrado])
-
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   if (conectando) {
-    return (
-      <div className="loading">
-        <div className="spinner" />
-      </div>
-    )
-  }
-
-  if (!cadastrado) {
-    return (
-      <div className="container">
-        <input
-          ref={inputName}
-          className="nome"
-          placeholder="Digite seu nome"
-        />
-        <button className="cadastrar" onClick={cadastrarNome}>
-          ENTRAR
-        </button>
-      </div>
-    )
+    return <div className="loading"><div className="spinner" /></div>
   }
 
   return (
@@ -138,51 +88,19 @@ function Home() {
       <ToastContainer />
 
       <div className="chat">
-        {messages.map(msg => {
-          const isMine =
-            msg.name.toLowerCase() === name.toLowerCase()
-
-          return (
-            <div
-              key={msg.id}
-              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
-            >
-              <div className="bubble-row">
-                {/* 🔥 BALÃO */}
-                <div className={`card ${isMine ? 'mine' : 'other'}`}>
-                  {!isMine && (
-                    <span className="user-name">
-                      {capitalizarNome(msg.name)}
-                    </span>
-                  )}
-
-                  <span className="text">{msg.text}</span>
-
-                  {/* 🗑 LIXEIRA AGORA DENTRO DO BALÃO */}
-                  {isMine && (
-                    <button
-                      className="delete"
-                      onClick={() => deleteMessage(msg.id)}
-                    >
-                      🗑
-                    </button>
-                  )}
-                </div>
+        {messages.map(msg => (
+          <div key={msg.id} className="message-wrapper mine">
+            <div className="bubble-row">
+              <div className="card mine">
+                <span className="text">{msg.text}</span>
               </div>
-
-              <span className={`time ${isMine ? 'mine' : 'other'}`}>
-                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
             </div>
-          )
-        })}
-
+          </div>
+        ))}
         <div ref={scrollRef} />
       </div>
 
+      {/* 🔽 INPUT + ÁUDIO */}
       <div className="input-area">
         <input
           ref={inputMessage}
@@ -190,8 +108,15 @@ function Home() {
           placeholder="Digite sua mensagem"
           onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
         />
+
+        {!gravando ? (
+          <button className="enviar" onClick={iniciarGravacao}>🎤</button>
+        ) : (
+          <button className="enviar" onClick={pararGravacao}>⏹</button>
+        )}
+
         <button className="enviar" onClick={enviarMensagem}>
-          ENVIAR
+          ➤
         </button>
       </div>
     </div>
@@ -199,4 +124,3 @@ function Home() {
 }
 
 export default Home
-

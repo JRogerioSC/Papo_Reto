@@ -38,9 +38,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  /* espaço entre mensagem e lixeira */
 }
-
 
 /* ===================== BALÃO ===================== */
 .card {
@@ -68,7 +66,7 @@
   cursor: pointer;
   font-size: 15px;
   opacity: 0.6;
-  padding: 0px;
+  padding: 0;
   display: flex;
   align-items: center;
 }
@@ -77,7 +75,6 @@
   opacity: 1;
   transform: scale(1.15);
 }
-
 
 .delete:active {
   transform: scale(1.2);
@@ -109,6 +106,7 @@
   display: flex;
   gap: 8px;
   margin-top: 8px;
+  align-items: center;
 }
 
 .menssage {
@@ -117,17 +115,47 @@
   padding: 12px;
   border: none;
   outline: none;
+  font-size: 14px;
 }
 
+/* ===================== BOTÕES ===================== */
 .enviar {
   background: #128c7e;
   color: #fff;
-  border-radius: 20px;
-  padding: 0 10px;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: transform 0.1s ease, background 0.2s;
 }
 
 .enviar:hover {
   cursor: pointer;
-  color: #68ca1c;
+  background: #0e7a6b;
+  transform: scale(1.05);
+}
+
+/* 🎙️ GRAVANDO */
+.enviar.gravando {
+  background: #d32f2f;
+  animation: pulse 1.2s infinite;
+}
+
+/* ===================== ANIMAÇÃO ===================== */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.6);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(211, 47, 47, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+  }
 }
