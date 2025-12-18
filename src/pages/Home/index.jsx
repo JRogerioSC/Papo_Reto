@@ -12,8 +12,7 @@ const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
 function Home() {
   const [messages, setMessages] = useState([])
-  const [name, setName] = useState('')
-  const [cadastrado, setCadastrado] = useState(false)
+  const [name] = useState('rogerio') // 🔴 ajuste depois se quiser login
   const [conectando, setConectando] = useState(true)
 
   // 🎙️ ÁUDIO
@@ -21,15 +20,55 @@ function Home() {
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
 
-  const inputName = useRef(null)
   const inputMessage = useRef(null)
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
-  function capitalizarNome(nome) {
-    return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase()
-  }
+  // =====================
+  // 🔌 SOCKET + LOAD
+  // =====================
+  useEffect(() => {
+    async function iniciar() {
+      try {
+        // 📥 mensagens
+        const res = await axios.get(`${BACKEND_URL}/usuarios`)
+        setMessages(res.data)
 
+        // 🔌 socket
+        socketRef.current = io(BACKEND_URL)
+
+        socketRef.current.emit('register', name)
+
+        socketRef.current.on('nova_mensagem', msg => {
+          setMessages(prev => [...prev, msg])
+        })
+
+        socketRef.current.on('mensagem_apagada', id => {
+          setMessages(prev => prev.filter(m => m.id !== id))
+        })
+
+        setConectando(false)
+      } catch (err) {
+        toast.error('Erro ao conectar no servidor')
+        console.error(err)
+      }
+    }
+
+    iniciar()
+
+    return () => socketRef.current?.disconnect()
+  }, [name])
+
+  // =====================
+  // 📜 AUTO SCROLL
+  // =====================
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // =====================
+  // 🎙️ GRAVAÇÃO
+  // =====================
   async function iniciarGravacao() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -47,8 +86,7 @@ function Home() {
         })
 
         console.log('🎧 Áudio gravado:', audioBlob)
-        toast.success('Áudio gravado! (pronto para enviar)')
-        // 👉 NO PRÓXIMO PASSO vamos enviar pro backend
+        toast.success('Áudio gravado (envio no próximo passo)')
       }
 
       mediaRecorderRef.current.start()
@@ -63,6 +101,9 @@ function Home() {
     setGravando(false)
   }
 
+  // =====================
+  // ✉️ ENVIAR TEXTO
+  // =====================
   async function enviarMensagem() {
     const text = inputMessage.current.value.trim()
     if (!text) return
@@ -75,14 +116,20 @@ function Home() {
     inputMessage.current.value = ''
   }
 
-  useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
+  // =====================
+  // ⏳ LOADING
+  // =====================
   if (conectando) {
-    return <div className="loading"><div className="spinner" /></div>
+    return (
+      <div className="loading">
+        <div className="spinner" />
+      </div>
+    )
   }
 
+  // =====================
+  // 🖥️ UI
+  // =====================
   return (
     <div className="container">
       <ToastContainer />
@@ -100,7 +147,6 @@ function Home() {
         <div ref={scrollRef} />
       </div>
 
-      {/* 🔽 INPUT + ÁUDIO */}
       <div className="input-area">
         <input
           ref={inputMessage}
@@ -109,11 +155,12 @@ function Home() {
           onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
         />
 
-        {!gravando ? (
-          <button className="enviar" onClick={iniciarGravacao}>🎤</button>
-        ) : (
-          <button className="enviar" onClick={pararGravacao}>⏹</button>
-        )}
+        <button
+          className={`enviar ${gravando ? 'gravando' : ''}`}
+          onClick={gravando ? pararGravacao : iniciarGravacao}
+        >
+          {gravando ? '⏹' : '🎤'}
+        </button>
 
         <button className="enviar" onClick={enviarMensagem}>
           ➤
