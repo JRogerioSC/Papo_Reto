@@ -133,6 +133,15 @@ function Home() {
   }, [name])
 
   // =====================
+  // 📜 AUTO SCROLL
+  // =====================
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    })
+  }, [messages])
+
+  // =====================
   // 🗑️ APAGAR
   // =====================
   async function apagarMensagem(id) {
@@ -325,3 +334,4 @@ function Home() {
 }
 
 export default Home
+
