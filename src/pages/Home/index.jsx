@@ -12,13 +12,14 @@ const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
 function Home() {
   const [messages, setMessages] = useState([])
-  const [name] = useState('rogerio') // 🔴 ajuste depois se quiser login
+  const [name] = useState('rogerio')
   const [conectando, setConectando] = useState(true)
 
   // 🎙️ ÁUDIO
   const [gravando, setGravando] = useState(false)
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
+  const enviandoAudioRef = useRef(false)
 
   const inputMessage = useRef(null)
   const scrollRef = useRef(null)
@@ -30,17 +31,16 @@ function Home() {
   useEffect(() => {
     async function iniciar() {
       try {
-        // 📥 mensagens
         const res = await axios.get(`${BACKEND_URL}/usuarios`)
         setMessages(res.data)
 
-        // 🔌 socket
         socketRef.current = io(BACKEND_URL)
-
         socketRef.current.emit('register', name)
 
         socketRef.current.on('nova_mensagem', msg => {
-          setMessages(prev => [...prev, msg])
+          setMessages(prev =>
+            prev.some(m => m.id === msg.id) ? prev : [...prev, msg]
+          )
         })
 
         socketRef.current.on('mensagem_apagada', id => {
@@ -48,14 +48,12 @@ function Home() {
         })
 
         setConectando(false)
-      } catch (err) {
+      } catch {
         toast.error('Erro ao conectar no servidor')
-        console.error(err)
       }
     }
 
     iniciar()
-
     return () => socketRef.current?.disconnect()
   }, [name])
 
@@ -67,7 +65,20 @@ function Home() {
   }, [messages])
 
   // =====================
-  // 🎙️ GRAVAÇÃO
+  // 🗑️ APAGAR
+  // =====================
+  async function apagarMensagem(id) {
+    try {
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
+        data: { name }
+      })
+    } catch {
+      toast.error('Erro ao apagar mensagem')
+    }
+  }
+
+  // =====================
+  // 🎙️ ÁUDIO
   // =====================
   async function iniciarGravacao() {
     try {
@@ -75,18 +86,25 @@ function Home() {
 
       mediaRecorderRef.current = new MediaRecorder(stream)
       audioChunksRef.current = []
+      enviandoAudioRef.current = false
 
       mediaRecorderRef.current.ondataavailable = e => {
         audioChunksRef.current.push(e.data)
       }
 
-      mediaRecorderRef.current.onstop = () => {
+      mediaRecorderRef.current.onstop = async () => {
+        if (enviandoAudioRef.current) return
+        enviandoAudioRef.current = true
+
         const audioBlob = new Blob(audioChunksRef.current, {
           type: 'audio/webm'
         })
 
-        console.log('🎧 Áudio gravado:', audioBlob)
-        toast.success('Áudio gravado (envio no próximo passo)')
+        const formData = new FormData()
+        formData.append('audio', audioBlob)
+        formData.append('name', name)
+
+        await axios.post(`${BACKEND_URL}/usuarios/audio`, formData)
       }
 
       mediaRecorderRef.current.start()
@@ -97,12 +115,12 @@ function Home() {
   }
 
   function pararGravacao() {
-    mediaRecorderRef.current.stop()
+    mediaRecorderRef.current?.stop()
     setGravando(false)
   }
 
   // =====================
-  // ✉️ ENVIAR TEXTO
+  // ✉️ TEXTO
   // =====================
   async function enviarMensagem() {
     const text = inputMessage.current.value.trim()
@@ -116,34 +134,73 @@ function Home() {
     inputMessage.current.value = ''
   }
 
-  // =====================
-  // ⏳ LOADING
-  // =====================
-  if (conectando) {
-    return (
-      <div className="loading">
-        <div className="spinner" />
-      </div>
-    )
-  }
+  if (conectando) return <div>Conectando...</div>
 
   // =====================
-  // 🖥️ UI
+  // 🖥️ UI FINAL (DATA + HORA)
   // =====================
   return (
     <div className="container">
       <ToastContainer />
 
       <div className="chat">
-        {messages.map(msg => (
-          <div key={msg.id} className="message-wrapper mine">
-            <div className="bubble-row">
-              <div className="card mine">
-                <span className="text">{msg.text}</span>
+        {messages.map((msg, index) => {
+          const isMine = msg.name.toLowerCase() === name.toLowerCase()
+
+          const dataAtual = new Date(msg.createdAt).toLocaleDateString('pt-BR')
+          const dataAnterior =
+            index > 0
+              ? new Date(messages[index - 1].createdAt).toLocaleDateString('pt-BR')
+              : null
+
+          const mostrarData = dataAtual !== dataAnterior
+
+          return (
+            <div key={msg.id}>
+              {/* 📅 DATA */}
+              {mostrarData && (
+                <div className="date-divider">
+                  <span>{dataAtual}</span>
+                </div>
+
+              )}
+
+              <div
+                className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+              >
+                <div className="bubble-row">
+                  <div className={`card ${isMine ? 'mine' : 'other'}`}>
+                    {msg.mediaType === 'audio' ? (
+                      <div className="audio-wrapper">
+                        <audio controls src={msg.mediaUrl} />
+                      </div>
+                    ) : (
+                      <span className="text">{msg.text}</span>
+                    )}
+
+                    {isMine && (
+                      <button
+                        className="delete"
+                        onClick={() => apagarMensagem(msg.id)}
+                      >
+                        🗑
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* ⏰ HORA */}
+                <span className="time">
+                  {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
+
         <div ref={scrollRef} />
       </div>
 

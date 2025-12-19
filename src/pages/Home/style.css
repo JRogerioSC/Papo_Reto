@@ -22,15 +22,16 @@
 .message-wrapper {
   display: flex;
   flex-direction: column;
-  max-width: 80%;
+  width: 100%;
+  /* 🔥 ocupa toda a largura */
 }
 
 .message-wrapper.mine {
-  align-self: flex-end;
+  align-self: stretch;
 }
 
 .message-wrapper.other {
-  align-self: flex-start;
+  align-self: stretch;
 }
 
 /* ===================== BUBBLE ROW ===================== */
@@ -40,13 +41,28 @@
   gap: 6px;
 }
 
+/* 🔥 empurra mensagens enviadas para a direita */
+.message-wrapper.mine .bubble-row {
+  justify-content: flex-end;
+}
+
 /* ===================== BALÃO ===================== */
 .card {
-  max-width: 100%;
+  max-width: 80%;
+  /* 🔥 limite fica no balão */
   padding: 10px 14px;
   border-radius: 14px;
   font-size: 14px;
   word-break: break-word;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+/* 🔥 cola o balão enviado na direita */
+.message-wrapper.mine .card {
+  margin-left: auto;
 }
 
 .card.mine {
@@ -80,15 +96,6 @@
   transform: scale(1.2);
 }
 
-/* ===================== NOME ===================== */
-.user-name {
-  font-size: 12px;
-  font-weight: bold;
-  color: #128c7e;
-  display: block;
-  margin-bottom: 3px;
-}
-
 /* ===================== TEXTO ===================== */
 .text {
   line-height: 1.4;
@@ -99,6 +106,7 @@
   font-size: 11px;
   color: #666;
   margin-top: 3px;
+  text-align: right;
 }
 
 /* ===================== INPUT ===================== */
@@ -158,4 +166,37 @@
   100% {
     box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
   }
+}
+
+/* ===================== AUDIO ===================== */
+.audio-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.audio-wrapper audio {
+  max-width: 220px;
+  display: block;
+}
+
+/* lixeira dentro do balão */
+.card .delete {
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+/* ===================== DATA CENTRALIZADA ===================== */
+.date-divider {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.date-divider span {
+  background: #d5dbd8;
+  color: #555;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
 }
