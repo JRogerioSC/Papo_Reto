@@ -23,25 +23,25 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* 🔥 ocupa toda a largura */
 }
 
+/* enviadas → direita */
 .message-wrapper.mine {
-  align-self: stretch;
+  align-items: flex-end;
 }
 
+/* recebidas → esquerda */
 .message-wrapper.other {
-  align-self: stretch;
+  align-items: flex-start;
 }
 
 /* ===================== BUBBLE ROW ===================== */
 .bubble-row {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  width: 100%;
 }
 
-/* 🔥 empurra mensagens enviadas para a direita */
+/* empurra mensagens enviadas para a direita */
 .message-wrapper.mine .bubble-row {
   justify-content: flex-end;
 }
@@ -49,7 +49,6 @@
 /* ===================== BALÃO ===================== */
 .card {
   max-width: 80%;
-  /* 🔥 limite fica no balão */
   padding: 10px 14px;
   border-radius: 14px;
   font-size: 14px;
@@ -60,11 +59,12 @@
   position: relative;
 }
 
-/* 🔥 cola o balão enviado na direita */
+/* cola o balão enviado na direita */
 .message-wrapper.mine .card {
   margin-left: auto;
 }
 
+/* cores */
 .card.mine {
   background-color: #dcf8c6;
   border-bottom-right-radius: 4px;
@@ -73,6 +73,22 @@
 .card.other {
   background-color: #ffffff;
   border-bottom-left-radius: 4px;
+}
+
+/* ===================== TEXTO ===================== */
+.text {
+  line-height: 1.4;
+}
+
+/* ===================== AUDIO ===================== */
+.audio-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.audio-wrapper audio {
+  max-width: 220px;
+  display: block;
 }
 
 /* ===================== DELETE ===================== */
@@ -96,9 +112,10 @@
   transform: scale(1.2);
 }
 
-/* ===================== TEXTO ===================== */
-.text {
-  line-height: 1.4;
+/* lixeira dentro do balão */
+.card .delete {
+  margin-left: 6px;
+  flex-shrink: 0;
 }
 
 /* ===================== HORA ===================== */
@@ -106,7 +123,16 @@
   font-size: 11px;
   color: #666;
   margin-top: 3px;
+}
+
+.time.right {
   text-align: right;
+  margin-right: 6px;
+}
+
+.time.left {
+  text-align: left;
+  margin-left: 6px;
 }
 
 /* ===================== INPUT ===================== */
@@ -168,23 +194,6 @@
   }
 }
 
-/* ===================== AUDIO ===================== */
-.audio-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.audio-wrapper audio {
-  max-width: 220px;
-  display: block;
-}
-
-/* lixeira dentro do balão */
-.card .delete {
-  margin-left: 6px;
-  flex-shrink: 0;
-}
-
 /* ===================== DATA CENTRALIZADA ===================== */
 .date-divider {
   width: 100%;
@@ -199,4 +208,31 @@
   font-size: 12px;
   padding: 4px 12px;
   border-radius: 12px;
+}
+
+/* ===================== TELA DE CADASTRO ===================== */
+.cadastro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 10px;
+}
+
+.cadastro input {
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
+  width: 220px;
+  outline: none;
+}
+
+.cadastro button {
+  padding: 10px 20px;
+  border-radius: 20px;
+  background: #128c7e;
+  color: #fff;
+  border: none;
+  cursor: pointer;
 }

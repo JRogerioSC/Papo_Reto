@@ -12,11 +12,13 @@ const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
 function Home() {
   const [messages, setMessages] = useState([])
-  const [name] = useState('rogerio')
+  const [name, setName] = useState('rogerio')
+  const [cadastrado, setCadastrado] = useState(true)
+  const [nomeCadastro, setNomeCadastro] = useState('')
   const [conectando, setConectando] = useState(true)
 
-  // 🎙️ ÁUDIO
   const [gravando, setGravando] = useState(false)
+
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
   const enviandoAudioRef = useRef(false)
@@ -26,14 +28,27 @@ function Home() {
   const socketRef = useRef(null)
 
   // =====================
-  // 🔌 SOCKET + LOAD
+  // 🔌 SOCKET + LOAD (CORRETO)
   // =====================
   useEffect(() => {
     async function iniciar() {
       try {
+        // 1️⃣ Verificar se usuário ainda existe
+        const valida = await axios.get(
+          `${BACKEND_URL}/usuarios/validar/${name}`
+        )
+
+        if (!valida.data.exists) {
+          setCadastrado(false)
+          setConectando(false)
+          return
+        }
+
+        // 2️⃣ Carregar mensagens
         const res = await axios.get(`${BACKEND_URL}/usuarios`)
         setMessages(res.data)
 
+        // 3️⃣ Socket
         socketRef.current = io(BACKEND_URL)
         socketRef.current.emit('register', name)
 
@@ -48,21 +63,20 @@ function Home() {
         })
 
         setConectando(false)
-      } catch {
-        toast.error('Erro ao conectar no servidor')
+      } catch (err) {
+        // ⚠️ usuário não existe mais
+        setCadastrado(false)
+        setConectando(false)
       }
     }
 
     iniciar()
-    return () => socketRef.current?.disconnect()
+
+    return () => {
+      socketRef.current?.disconnect()
+    }
   }, [name])
 
-  // =====================
-  // 📜 AUTO SCROLL
-  // =====================
-  useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
 
   // =====================
   // 🗑️ APAGAR
@@ -73,7 +87,7 @@ function Home() {
         data: { name }
       })
     } catch {
-      toast.error('Erro ao apagar mensagem')
+      toast.error('Você só pode apagar suas próprias mensagens')
     }
   }
 
@@ -134,73 +148,94 @@ function Home() {
     inputMessage.current.value = ''
   }
 
-  if (conectando) return <div>Conectando...</div>
+  // =====================
+  // 📝 CADASTRO (CORRIGIDO DEFINITIVO)
+  // =====================
+  async function cadastrar() {
+    if (!nomeCadastro.trim()) return
+
+    try {
+      await axios.post(`${BACKEND_URL}/usuarios`, {
+        name: nomeCadastro,
+        menssage: '👋 entrou no chat'
+      })
+
+      setName(nomeCadastro)
+      setCadastrado(true)
+      setConectando(true)
+    } catch (err) {
+      toast.error('Nome já existe ou erro no servidor')
+    }
+  }
+
 
   // =====================
-  // 🖥️ UI FINAL (DATA + HORA)
+  // 🛑 TELA DE CADASTRO
+  // =====================
+  if (!cadastrado) {
+    return (
+      <div className="container cadastro">
+        <ToastContainer />
+        <h2>Papo Reto</h2>
+
+        <input
+          placeholder="Digite seu nome"
+          value={nomeCadastro}
+          onChange={e => setNomeCadastro(e.target.value)}
+        />
+
+        <button onClick={cadastrar}>Criar conta</button>
+      </div>
+    )
+  }
+
+  if (conectando) return <div>Conectando ao servidor...</div>
+
+  // =====================
+  // 🖥️ CHAT
   // =====================
   return (
     <div className="container">
       <ToastContainer />
 
       <div className="chat">
-        {messages.map((msg, index) => {
-          const isMine = msg.name.toLowerCase() === name.toLowerCase()
-
-          const dataAtual = new Date(msg.createdAt).toLocaleDateString('pt-BR')
-          const dataAnterior =
-            index > 0
-              ? new Date(messages[index - 1].createdAt).toLocaleDateString('pt-BR')
-              : null
-
-          const mostrarData = dataAtual !== dataAnterior
+        {messages.map(msg => {
+          const isMine =
+            msg.name.toLowerCase() === name.toLowerCase()
 
           return (
-            <div key={msg.id}>
-              {/* 📅 DATA */}
-              {mostrarData && (
-                <div className="date-divider">
-                  <span>{dataAtual}</span>
+            <div
+              key={msg.id}
+              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+            >
+              <div className="bubble-row">
+                <div className={`card ${isMine ? 'mine' : 'other'}`}>
+                  {msg.mediaType === 'audio' ? (
+                    <audio controls src={msg.mediaUrl} />
+                  ) : (
+                    <span className="text">{msg.text}</span>
+                  )}
+
+                  {isMine && (
+                    <button
+                      className="delete"
+                      onClick={() => apagarMensagem(msg.id)}
+                    >
+                      🗑
+                    </button>
+                  )}
                 </div>
-
-              )}
-
-              <div
-                className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
-              >
-                <div className="bubble-row">
-                  <div className={`card ${isMine ? 'mine' : 'other'}`}>
-                    {msg.mediaType === 'audio' ? (
-                      <div className="audio-wrapper">
-                        <audio controls src={msg.mediaUrl} />
-                      </div>
-                    ) : (
-                      <span className="text">{msg.text}</span>
-                    )}
-
-                    {isMine && (
-                      <button
-                        className="delete"
-                        onClick={() => apagarMensagem(msg.id)}
-                      >
-                        🗑
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* ⏰ HORA */}
-                <span className="time">
-                  {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
               </div>
+
+              <span className={`time ${isMine ? 'right' : 'left'}`}>
+                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
             </div>
           )
         })}
-
         <div ref={scrollRef} />
       </div>
 
