@@ -10,16 +10,21 @@ register()
 
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
-// 🔤 Primeira letra maiúscula
-const capitalize = str =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : ''
-
 function Home() {
   const [messages, setMessages] = useState([])
-  const [name, setName] = useState('rogerio')
-  const [cadastrado, setCadastrado] = useState(true)
+
+  // 🔐 NOME SALVO
+  const [name, setName] = useState(() => {
+    return localStorage.getItem('papo_reto_nome') || ''
+  })
+
+  const [cadastrado, setCadastrado] = useState(() => {
+    return !!localStorage.getItem('papo_reto_nome')
+  })
+
   const [nomeCadastro, setNomeCadastro] = useState('')
   const [conectando, setConectando] = useState(true)
+
   const [gravando, setGravando] = useState(false)
 
   const mediaRecorderRef = useRef(null)
@@ -27,12 +32,19 @@ function Home() {
   const enviandoAudioRef = useRef(false)
 
   const inputMessage = useRef(null)
+  const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
   // =====================
   // 🔌 SOCKET + LOAD
   // =====================
   useEffect(() => {
+    if (!name) {
+      setCadastrado(false)
+      setConectando(false)
+      return
+    }
+
     async function iniciar() {
       try {
         const valida = await axios.get(
@@ -40,6 +52,7 @@ function Home() {
         )
 
         if (!valida.data.exists) {
+          localStorage.removeItem('papo_reto_nome')
           setCadastrado(false)
           setConectando(false)
           return
@@ -63,6 +76,7 @@ function Home() {
 
         setConectando(false)
       } catch {
+        localStorage.removeItem('papo_reto_nome')
         setCadastrado(false)
         setConectando(false)
       }
@@ -134,7 +148,7 @@ function Home() {
     const text = inputMessage.current.value.trim()
     if (!text) return
 
-    await axios.post(`${BACKEND_URL}/usuarios/mensagem`, {
+    await axios.post(`${BACKEND_URL}/usuarios`, {
       name,
       menssage: text
     })
@@ -149,17 +163,18 @@ function Home() {
     if (!nomeCadastro.trim()) return
 
     try {
-      const nomeFormatado = nomeCadastro.trim().toLowerCase()
-
-      await axios.post(`${BACKEND_URL}/usuarios/cadastro`, {
-        name: nomeFormatado
+      await axios.post(`${BACKEND_URL}/usuarios`, {
+        name: nomeCadastro,
+        menssage: '👋 entrou no chat'
       })
 
-      setName(nomeFormatado)
+      localStorage.setItem('papo_reto_nome', nomeCadastro)
+
+      setName(nomeCadastro)
       setCadastrado(true)
       setConectando(true)
     } catch {
-      toast.error('Nome já existe')
+      toast.error('Nome já existe ou erro no servidor')
     }
   }
 
@@ -197,6 +212,14 @@ function Home() {
           const isMine =
             msg.name?.toLowerCase() === name.toLowerCase()
 
+          if (msg.text?.includes('entrou no chat')) {
+            return (
+              <div key={msg.id} className="system-message">
+                {msg.name} entrou no chat 👋
+              </div>
+            )
+          }
+
           return (
             <div
               key={msg.id}
@@ -206,9 +229,7 @@ function Home() {
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
 
                   {!isMine && (
-                    <div className="username">
-                      {capitalize(msg.name)}
-                    </div>
+                    <div className="username">{msg.name}</div>
                   )}
 
                   {msg.mediaType === 'audio' ? (
@@ -237,6 +258,7 @@ function Home() {
             </div>
           )
         })}
+        <div ref={scrollRef} />
       </div>
 
       <div className="input-area">
