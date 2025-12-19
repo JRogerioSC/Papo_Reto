@@ -38,9 +38,8 @@
 /* ===================== BUBBLE ROW ===================== */
 .bubble-row {
   display: flex;
-  width: 100%;
-  justify-content: flex-start;
 }
+
 
 
 /* empurra mensagens enviadas para a direita */
@@ -62,9 +61,22 @@
 }
 
 /* cola o balão enviado na direita */
-.message-wrapper.mine .card {
-  margin-left: auto;
+/* ===================== WRAPPER ===================== */
+.message-wrapper {
+  display: flex;
+  width: 100%;
 }
+
+/* enviadas → direita */
+.message-wrapper.mine {
+  justify-content: flex-end;
+}
+
+/* recebidas → esquerda */
+.message-wrapper.other {
+  justify-content: flex-start;
+}
+
 
 /* cores */
 .card.mine {
