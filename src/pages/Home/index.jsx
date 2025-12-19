@@ -10,13 +10,16 @@ register()
 
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 
+// 🔤 Primeira letra maiúscula
+const capitalize = str =>
+  str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : ''
+
 function Home() {
   const [messages, setMessages] = useState([])
   const [name, setName] = useState('rogerio')
   const [cadastrado, setCadastrado] = useState(true)
   const [nomeCadastro, setNomeCadastro] = useState('')
   const [conectando, setConectando] = useState(true)
-
   const [gravando, setGravando] = useState(false)
 
   const mediaRecorderRef = useRef(null)
@@ -24,7 +27,6 @@ function Home() {
   const enviandoAudioRef = useRef(false)
 
   const inputMessage = useRef(null)
-  const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
   // =====================
@@ -132,7 +134,7 @@ function Home() {
     const text = inputMessage.current.value.trim()
     if (!text) return
 
-    await axios.post(`${BACKEND_URL}/usuarios`, {
+    await axios.post(`${BACKEND_URL}/usuarios/mensagem`, {
       name,
       menssage: text
     })
@@ -147,16 +149,17 @@ function Home() {
     if (!nomeCadastro.trim()) return
 
     try {
-      await axios.post(`${BACKEND_URL}/usuarios`, {
-        name: nomeCadastro,
-        menssage: '👋 entrou no chat'
+      const nomeFormatado = nomeCadastro.trim().toLowerCase()
+
+      await axios.post(`${BACKEND_URL}/usuarios/cadastro`, {
+        name: nomeFormatado
       })
 
-      setName(nomeCadastro)
+      setName(nomeFormatado)
       setCadastrado(true)
       setConectando(true)
     } catch {
-      toast.error('Nome já existe ou erro no servidor')
+      toast.error('Nome já existe')
     }
   }
 
@@ -194,15 +197,6 @@ function Home() {
           const isMine =
             msg.name?.toLowerCase() === name.toLowerCase()
 
-          // 🔔 Mensagem de sistema (entrou no chat)
-          if (msg.text?.includes('entrou no chat')) {
-            return (
-              <div key={msg.id} className="system-message">
-                {msg.name} entrou no chat 👋
-              </div>
-            )
-          }
-
           return (
             <div
               key={msg.id}
@@ -211,9 +205,10 @@ function Home() {
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
 
-                  {/* 👤 Nome do usuário */}
                   {!isMine && (
-                    <div className="username">{msg.name}</div>
+                    <div className="username">
+                      {capitalize(msg.name)}
+                    </div>
                   )}
 
                   {msg.mediaType === 'audio' ? (
@@ -242,7 +237,6 @@ function Home() {
             </div>
           )
         })}
-        <div ref={scrollRef} />
       </div>
 
       <div className="input-area">
