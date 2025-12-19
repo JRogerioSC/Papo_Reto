@@ -39,7 +39,9 @@
 .bubble-row {
   display: flex;
   width: 100%;
+  justify-content: flex-start;
 }
+
 
 /* empurra mensagens enviadas para a direita */
 .message-wrapper.mine .bubble-row {
