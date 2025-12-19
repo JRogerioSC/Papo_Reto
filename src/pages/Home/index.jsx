@@ -13,7 +13,6 @@ const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 function Home() {
   const [messages, setMessages] = useState([])
 
-  // 🔐 NOME SALVO
   const [name, setName] = useState(() => {
     return localStorage.getItem('papo_reto_nome') || ''
   })
@@ -34,6 +33,49 @@ function Home() {
   const inputMessage = useRef(null)
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
+
+  // =====================
+  // 🔒 NORMALIZA MENSAGEM
+  // =====================
+  function normalizarMensagem(msg) {
+    return {
+      ...msg,
+      text: msg.text || msg.menssage || '',
+      createdAt:
+        msg.createdAt ||
+        msg.created_at ||
+        msg.date ||
+        new Date().toISOString()
+    }
+  }
+
+  // =====================
+  // 📅 DATA/HORA
+  // =====================
+  function formatarDataHora(msg) {
+    const d = new Date(msg.createdAt)
+    const hoje = new Date()
+
+    const mesmaData =
+      d.getDate() === hoje.getDate() &&
+      d.getMonth() === hoje.getMonth() &&
+      d.getFullYear() === hoje.getFullYear()
+
+    if (mesmaData) {
+      return d.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    return d.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
 
   // =====================
   // 🔌 SOCKET + LOAD
@@ -59,14 +101,18 @@ function Home() {
         }
 
         const res = await axios.get(`${BACKEND_URL}/usuarios`)
-        setMessages(res.data)
+        setMessages(res.data.map(normalizarMensagem))
 
         socketRef.current = io(BACKEND_URL)
         socketRef.current.emit('register', name)
 
         socketRef.current.on('nova_mensagem', msg => {
+          const mensagem = normalizarMensagem(msg)
+
           setMessages(prev =>
-            prev.some(m => m.id === msg.id) ? prev : [...prev, msg]
+            prev.some(m => m.id === mensagem.id)
+              ? prev
+              : [...prev, mensagem]
           )
         })
 
@@ -178,9 +224,6 @@ function Home() {
     }
   }
 
-  // =====================
-  // 🛑 CADASTRO
-  // =====================
   if (!cadastrado) {
     return (
       <div className="container cadastro">
@@ -212,7 +255,7 @@ function Home() {
           const isMine =
             msg.name?.toLowerCase() === name.toLowerCase()
 
-          if (msg.text?.includes('entrou no chat')) {
+          if (msg.text.includes('entrou no chat')) {
             return (
               <div key={msg.id} className="system-message">
                 {msg.name} entrou no chat 👋
@@ -250,10 +293,7 @@ function Home() {
               </div>
 
               <span className={`time ${isMine ? 'right' : 'left'}`}>
-                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+                {formatarDataHora(msg)}
               </span>
             </div>
           )

@@ -274,3 +274,20 @@
   padding: 6px 12px;
   border-radius: 10px;
 }
+
+/* =====================
+   HORA
+===================== */
+.time {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.time.right {
+  text-align: right;
+}
+
+.time.left {
+  text-align: left;
+}
