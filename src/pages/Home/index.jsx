@@ -28,12 +28,11 @@ function Home() {
   const socketRef = useRef(null)
 
   // =====================
-  // 🔌 SOCKET + LOAD (CORRETO)
+  // 🔌 SOCKET + LOAD
   // =====================
   useEffect(() => {
     async function iniciar() {
       try {
-        // 1️⃣ Verificar se usuário ainda existe
         const valida = await axios.get(
           `${BACKEND_URL}/usuarios/validar/${name}`
         )
@@ -44,11 +43,9 @@ function Home() {
           return
         }
 
-        // 2️⃣ Carregar mensagens
         const res = await axios.get(`${BACKEND_URL}/usuarios`)
         setMessages(res.data)
 
-        // 3️⃣ Socket
         socketRef.current = io(BACKEND_URL)
         socketRef.current.emit('register', name)
 
@@ -63,20 +60,15 @@ function Home() {
         })
 
         setConectando(false)
-      } catch (err) {
-        // ⚠️ usuário não existe mais
+      } catch {
         setCadastrado(false)
         setConectando(false)
       }
     }
 
     iniciar()
-
-    return () => {
-      socketRef.current?.disconnect()
-    }
+    return () => socketRef.current?.disconnect()
   }, [name])
-
 
   // =====================
   // 🗑️ APAGAR
@@ -149,7 +141,7 @@ function Home() {
   }
 
   // =====================
-  // 📝 CADASTRO (CORRIGIDO DEFINITIVO)
+  // 📝 CADASTRO
   // =====================
   async function cadastrar() {
     if (!nomeCadastro.trim()) return
@@ -163,14 +155,13 @@ function Home() {
       setName(nomeCadastro)
       setCadastrado(true)
       setConectando(true)
-    } catch (err) {
+    } catch {
       toast.error('Nome já existe ou erro no servidor')
     }
   }
 
-
   // =====================
-  // 🛑 TELA DE CADASTRO
+  // 🛑 CADASTRO
   // =====================
   if (!cadastrado) {
     return (
@@ -201,7 +192,16 @@ function Home() {
       <div className="chat">
         {messages.map(msg => {
           const isMine =
-            msg.name.toLowerCase() === name.toLowerCase()
+            msg.name?.toLowerCase() === name.toLowerCase()
+
+          // 🔔 Mensagem de sistema (entrou no chat)
+          if (msg.text?.includes('entrou no chat')) {
+            return (
+              <div key={msg.id} className="system-message">
+                {msg.name} entrou no chat 👋
+              </div>
+            )
+          }
 
           return (
             <div
@@ -210,6 +210,12 @@ function Home() {
             >
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
+
+                  {/* 👤 Nome do usuário */}
+                  {!isMine && (
+                    <div className="username">{msg.name}</div>
+                  )}
+
                   {msg.mediaType === 'audio' ? (
                     <audio controls src={msg.mediaUrl} />
                   ) : (
