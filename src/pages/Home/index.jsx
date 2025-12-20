@@ -9,6 +9,7 @@ import { register } from './serviceWorkerRegistration'
 register()
 
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
+const VAPID_PUBLIC_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
 function Home() {
   const [messages, setMessages] = useState([])
@@ -33,6 +34,36 @@ function Home() {
   const inputMessage = useRef(null)
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
+
+  // =====================
+  // 🔔 PUSH NOTIFICATION
+  // =====================
+  async function registrarPushNotifications() {
+    try {
+      if (!('serviceWorker' in navigator)) return
+
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') return
+
+      const registration = await navigator.serviceWorker.ready
+
+      let subscription = await registration.pushManager.getSubscription()
+
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: VAPID_PUBLIC_KEY
+        })
+      }
+
+      await axios.post(`${BACKEND_URL}/push/subscribe`, {
+        name,
+        subscription
+      })
+    } catch (err) {
+      console.error('Erro ao registrar push', err)
+    }
+  }
 
   // =====================
   // 🔒 NORMALIZA MENSAGEM
@@ -103,6 +134,8 @@ function Home() {
         const res = await axios.get(`${BACKEND_URL}/usuarios`)
         setMessages(res.data.map(normalizarMensagem))
 
+        await registrarPushNotifications()
+
         socketRef.current = io(BACKEND_URL)
         socketRef.current.emit('register', name)
 
@@ -136,9 +169,7 @@ function Home() {
   // 📜 AUTO SCROLL
   // =====================
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({
-      behavior: 'smooth'
-    })
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   // =====================
@@ -252,9 +283,6 @@ function Home() {
 
   if (conectando) return <div>Conectando ao servidor...</div>
 
-  // =====================
-  // 🖥️ CHAT
-  // =====================
   return (
     <div className="container">
       <ToastContainer />
@@ -279,7 +307,6 @@ function Home() {
             >
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
-
                   {!isMine && (
                     <div className="username">{msg.name}</div>
                   )}
