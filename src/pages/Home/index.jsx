@@ -1,340 +1,364 @@
-import express from 'express'
-import cors from 'cors'
-import { PrismaClient } from '@prisma/client'
-import webpush from 'web-push'
-import http from 'http'
-import { Server } from 'socket.io'
-import multer from 'multer'
-import path from 'path'
-import fs from 'fs'
+import { useEffect, useState, useRef } from 'react'
+import axios from 'axios'
+import './style.css'
+import { io } from 'socket.io-client'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { register } from './serviceWorkerRegistration'
 
-const prisma = new PrismaClient()
-const app = express()
+register()
 
-// =====================
-// 🔐 VAPID KEYS
-// =====================
-const vapidKeys = {
-  publicKey: 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY',
-  privateKey: 'hKMev5kvTyICm1lybTzBE5HJNEJnVxgwDnlsN7B6H5M'
-}
+const BACKEND_URL = 'https://api-papo-reto.onrender.com'
+const VAPID_PUBLIC_KEY = 'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
-webpush.setVapidDetails(
-  'mailto:admin@pap0reto.net',
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-)
+function Home() {
+  const [messages, setMessages] = useState([])
 
-// =====================
-// 🌐 CORS + JSON
-// =====================
-app.use(cors({ origin: true, credentials: true }))
-app.use(express.json())
-
-// =====================
-// 📂 UPLOADS (ÁUDIO)
-// =====================
-const uploadDir = path.resolve('uploads')
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir)
-
-app.use('/uploads', express.static(uploadDir))
-
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, uploadDir),
-  filename: (_, file, cb) => {
-    const ext = path.extname(file.originalname)
-    cb(null, `${Date.now()}-${Math.random()}${ext}`)
-  }
-})
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
-})
-
-// =====================
-// 🔌 HTTP + SOCKET.IO
-// =====================
-const server = http.createServer(app)
-const io = new Server(server, {
-  cors: { origin: true, methods: ['GET', 'POST', 'DELETE'] }
-})
-
-// =====================
-// 📦 PUSH SUBSCRIPTIONS
-// =====================
-const subscriptions = []
-
-// =====================
-// 🔗 SOCKET USERS ONLINE
-// =====================
-const userSockets = new Map()
-
-io.on('connection', socket => {
-  socket.on('register', name => {
-    if (name) userSockets.set(name.toLowerCase(), socket.id)
+  const [name, setName] = useState(() => {
+    return localStorage.getItem('papo_reto_nome') || ''
   })
 
-  socket.on('disconnect', () => {
-    for (const [name, id] of userSockets.entries()) {
-      if (id === socket.id) userSockets.delete(name)
+  const [cadastrado, setCadastrado] = useState(() => {
+    return !!localStorage.getItem('papo_reto_nome')
+  })
+
+  const [nomeCadastro, setNomeCadastro] = useState('')
+  const [conectando, setConectando] = useState(true)
+
+  const [gravando, setGravando] = useState(false)
+
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+  const enviandoAudioRef = useRef(false)
+
+  const inputMessage = useRef(null)
+  const scrollRef = useRef(null)
+  const socketRef = useRef(null)
+
+  // =====================
+  // 🔔 PUSH NOTIFICATION
+  // =====================
+  async function registrarPushNotifications() {
+    try {
+      if (!('serviceWorker' in navigator)) return
+
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') return
+
+      const registration = await navigator.serviceWorker.ready
+
+      let subscription = await registration.pushManager.getSubscription()
+
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: VAPID_PUBLIC_KEY
+        })
+      }
+
+      await axios.post(`${BACKEND_URL}/push/subscribe`, {
+        name,
+        subscription
+      })
+    } catch (err) {
+      console.error('Erro ao registrar push', err)
     }
-  })
-})
-
-// =====================
-// 🔔 SUBSCRIBE PUSH
-// =====================
-app.post('/subscribe', (req, res) => {
-  const { subscription, name } = req.body
-  if (!subscription || !name) return res.status(400).json({ error: 'Dados inválidos' })
-
-  const exists = subscriptions.some(s => s.subscription.endpoint === subscription.endpoint)
-  if (!exists) subscriptions.push({ name: name.toLowerCase(), subscription })
-
-  res.status(201).json({ ok: true })
-})
-
-// =====================
-// 👤 CADASTRAR USUÁRIO (OU IGNORAR SE JÁ EXISTIR)
-// =====================
-app.post('/usuarios', async (req, res) => {
-  const { name, menssage } = req.body
-
-  if (!name?.trim()) {
-    return res.status(400).json({ error: 'Nome obrigatório' })
   }
 
-  const normalized = name.trim().toLowerCase()
+  // =====================
+  // 🔒 NORMALIZA MENSAGEM
+  // =====================
+  function normalizarMensagem(msg) {
+    return {
+      ...msg,
+      text: msg.text || msg.menssage || '',
+      createdAt:
+        msg.createdAt ||
+        msg.created_at ||
+        msg.date ||
+        new Date().toISOString()
+    }
+  }
 
-  let user = await prisma.user.findFirst({
-    where: { name: { equals: normalized, mode: 'insensitive' } }
-  })
+  // =====================
+  // 📅 DATA/HORA
+  // =====================
+  function formatarDataHora(msg) {
+    const d = new Date(msg.createdAt)
+    const hoje = new Date()
 
-  // 👉 SE NÃO EXISTIR, CRIA O USUÁRIO
-  if (!user) {
-    user = await prisma.user.create({
-      data: { name: normalized }
+    const mesmaData =
+      d.getDate() === hoje.getDate() &&
+      d.getMonth() === hoje.getMonth() &&
+      d.getFullYear() === hoje.getFullYear()
+
+    if (mesmaData) {
+      return d.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    return d.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     })
   }
 
-  // 👉 SE NÃO VEIO MENSAGEM, É SÓ CADASTRO
-  if (!menssage || !menssage.trim()) {
-    return res.status(201).json({
-      id: user.id,
-      name: user.name,
-      created: true
-    })
-  }
-
-  // 👉 SE VEIO MENSAGEM, SALVA
-  const message = await prisma.message.create({
-    data: {
-      text: menssage.trim(),
-      mediaType: 'text',
-      userId: user.id
+  // =====================
+  // 🔌 SOCKET + LOAD
+  // =====================
+  useEffect(() => {
+    if (!name) {
+      setCadastrado(false)
+      setConectando(false)
+      return
     }
-  })
 
-  const payload = {
-    id: message.id,
-    text: message.text,
-    mediaType: 'text',
-    name: user.name,
-    createdAt: message.createdAt
-  }
+    async function iniciar() {
+      try {
+        const valida = await axios.get(
+          `${BACKEND_URL}/usuarios/validar/${name}`
+        )
 
-  io.emit('nova_mensagem', payload)
+        if (!valida.data.exists) {
+          localStorage.removeItem('papo_reto_nome')
+          setCadastrado(false)
+          setConectando(false)
+          return
+        }
 
-  sendNotification({
-    title: `Nova mensagem de ${user.name}`,
-    body: message.text,
-    url: 'https://pap0reto.netlify.app'
-  })
+        const res = await axios.get(`${BACKEND_URL}/usuarios`)
+        setMessages(res.data.map(normalizarMensagem))
 
-  res.status(201).json(payload)
-})
+        await registrarPushNotifications()
 
-// =====================
-// 🔎 VALIDAR USUÁRIO
-// =====================
-// =====================
-// 🔎 VALIDAR USUÁRIO (EXISTE?)
-// =====================
-app.get('/usuarios/validar/:name', async (req, res) => {
-  const { name } = req.params
+        socketRef.current = io(BACKEND_URL)
+        socketRef.current.emit('register', name)
 
-  if (!name?.trim()) {
-    return res.status(400).json({ exists: false })
-  }
+        socketRef.current.on('nova_mensagem', msg => {
+          const mensagem = normalizarMensagem(msg)
 
-  const user = await prisma.user.findFirst({
-    where: {
-      name: {
-        equals: name.trim().toLowerCase(),
-        mode: 'insensitive'
+          setMessages(prev =>
+            prev.some(m => m.id === mensagem.id)
+              ? prev
+              : [...prev, mensagem]
+          )
+        })
+
+        socketRef.current.on('mensagem_apagada', id => {
+          setMessages(prev => prev.filter(m => m.id !== id))
+        })
+
+        setConectando(false)
+      } catch {
+        localStorage.removeItem('papo_reto_nome')
+        setCadastrado(false)
+        setConectando(false)
       }
     }
-  })
 
-  if (!user) {
-    return res.status(404).json({ exists: false })
-  }
+    iniciar()
+    return () => socketRef.current?.disconnect()
+  }, [name])
 
-  res.json({ exists: true })
-})
+  // =====================
+  // 📜 AUTO SCROLL
+  // =====================
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
-
-// =====================
-// 💬 ENVIAR TEXTO
-// =====================
-app.post('/usuarios', async (req, res) => {
-  const { name, menssage } = req.body
-  if (!name?.trim() || !menssage?.trim()) {
-    return res.status(400).json({ error: 'Nome e mensagem obrigatórios' })
-  }
-
-  const normalized = name.trim().toLowerCase()
-
-  const user = await prisma.user.findFirst({
-    where: { name: { equals: normalized, mode: 'insensitive' } }
-  })
-  if (!user) return res.status(400).json({ error: 'Usuário não cadastrado' })
-
-  const message = await prisma.message.create({
-    data: {
-      text: menssage.trim(),
-      mediaType: 'text',
-      userId: user.id
-    }
-  })
-
-  const payload = {
-    id: message.id,
-    text: message.text,
-    mediaType: 'text',
-    name: user.name,
-    createdAt: message.createdAt
-  }
-
-  io.emit('nova_mensagem', payload)
-  sendNotification({
-    title: `Nova mensagem de ${user.name}`,
-    body: message.text,
-    url: 'https://pap0reto.netlify.app'
-  })
-
-  res.status(201).json(payload)
-})
-
-// =====================
-// 🎙 ENVIAR ÁUDIO
-// =====================
-app.post('/usuarios/audio', upload.single('audio'), async (req, res) => {
-  const { name } = req.body
-  if (!req.file || !name) {
-    return res.status(400).json({ error: 'Áudio e nome obrigatórios' })
-  }
-
-  const normalized = name.trim().toLowerCase()
-
-  const user = await prisma.user.findFirst({
-    where: { name: { equals: normalized, mode: 'insensitive' } }
-  })
-  if (!user) return res.status(400).json({ error: 'Usuário não cadastrado' })
-
-  const audioUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`
-
-  const message = await prisma.message.create({
-    data: {
-      mediaUrl: audioUrl,
-      mediaType: 'audio',
-      userId: user.id
-    }
-  })
-
-  const payload = {
-    id: message.id,
-    mediaUrl: audioUrl,
-    mediaType: 'audio',
-    name: user.name,
-    createdAt: message.createdAt
-  }
-
-  io.emit('nova_mensagem', payload)
-  sendNotification({
-    title: `🎙 Áudio de ${user.name}`,
-    body: 'Mensagem de áudio',
-    url: 'https://pap0reto.netlify.app'
-  })
-
-  res.status(201).json(payload)
-})
-
-// =====================
-// 📥 LISTAR MENSAGENS
-// =====================
-app.get('/usuarios', async (req, res) => {
-  const mensagens = await prisma.message.findMany({
-    include: { user: true },
-    orderBy: { createdAt: 'asc' }
-  })
-
-  res.json(
-    mensagens.map(m => ({
-      id: m.id,
-      text: m.text,
-      mediaUrl: m.mediaUrl,
-      mediaType: m.mediaType,
-      name: m.user.name,
-      createdAt: m.createdAt
-    }))
-  )
-})
-
-// =====================
-// 🗑 APAGAR MENSAGEM
-// =====================
-app.delete('/usuarios/:id', async (req, res) => {
-  const { id } = req.params
-  const { name } = req.body
-
-  const message = await prisma.message.findUnique({
-    where: { id },
-    include: { user: true }
-  })
-
-  if (!message) return res.sendStatus(404)
-  if (message.user.name.toLowerCase() !== name.toLowerCase()) {
-    return res.status(403).json({ error: 'Não autorizado' })
-  }
-
-  await prisma.message.delete({ where: { id } })
-  io.emit('mensagem_apagada', id)
-  res.sendStatus(204)
-})
-
-// =====================
-// 🔔 PUSH OFFLINE
-// =====================
-function sendNotification(msg) {
-  for (const sub of subscriptions) {
-    if (userSockets.has(sub.name)) continue
-    webpush.sendNotification(
-      sub.subscription,
-      JSON.stringify({
-        title: msg.title,
-        body: msg.body,
-        data: { url: msg.url }
+  // =====================
+  // 🗑️ APAGAR
+  // =====================
+  async function apagarMensagem(id) {
+    try {
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
+        data: { name }
       })
-    ).catch(() => { })
+    } catch {
+      toast.error('Você só pode apagar suas próprias mensagens')
+    }
   }
+
+  // =====================
+  // 🎙️ ÁUDIO
+  // =====================
+  async function iniciarGravacao() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+
+      mediaRecorderRef.current = new MediaRecorder(stream)
+      audioChunksRef.current = []
+      enviandoAudioRef.current = false
+
+      mediaRecorderRef.current.ondataavailable = e => {
+        audioChunksRef.current.push(e.data)
+      }
+
+      mediaRecorderRef.current.onstop = async () => {
+        if (enviandoAudioRef.current) return
+        enviandoAudioRef.current = true
+
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: 'audio/webm'
+        })
+
+        const formData = new FormData()
+        formData.append('audio', audioBlob)
+        formData.append('name', name)
+
+        await axios.post(`${BACKEND_URL}/usuarios/audio`, formData)
+      }
+
+      mediaRecorderRef.current.start()
+      setGravando(true)
+    } catch {
+      toast.error('Permissão de microfone negada')
+    }
+  }
+
+  function pararGravacao() {
+    mediaRecorderRef.current?.stop()
+    setGravando(false)
+  }
+
+  // =====================
+  // ✉️ TEXTO
+  // =====================
+  async function enviarMensagem() {
+    const text = inputMessage.current.value.trim()
+    if (!text) return
+
+    await axios.post(`${BACKEND_URL}/usuarios`, {
+      name,
+      menssage: text
+    })
+
+    inputMessage.current.value = ''
+  }
+
+  // =====================
+  // 📝 CADASTRO
+  // =====================
+  async function cadastrar() {
+    if (!nomeCadastro.trim()) return
+
+    try {
+      await axios.post(`${BACKEND_URL}/usuarios`, {
+        name: nomeCadastro,
+        menssage: '👋 entrou no chat'
+      })
+
+      localStorage.setItem('papo_reto_nome', nomeCadastro)
+
+      setName(nomeCadastro)
+      setCadastrado(true)
+      setConectando(true)
+    } catch {
+      toast.error('Nome já existe ou erro no servidor')
+    }
+  }
+
+  if (!cadastrado) {
+    return (
+      <div className="container cadastro">
+        <ToastContainer />
+        <h2>Papo Reto</h2>
+
+        <input
+          placeholder="Digite seu nome"
+          value={nomeCadastro}
+          onChange={e => setNomeCadastro(e.target.value)}
+        />
+
+        <button onClick={cadastrar}>Criar conta</button>
+      </div>
+    )
+  }
+
+  if (conectando) return <div>Conectando ao servidor...</div>
+
+  return (
+    <div className="container">
+      <ToastContainer />
+
+      <div className="chat">
+        {messages.map(msg => {
+          const isMine =
+            msg.name?.toLowerCase() === name.toLowerCase()
+
+          if (msg.text.includes('entrou no chat')) {
+            return (
+              <div key={msg.id} className="system-message">
+                {msg.name} entrou no chat 👋
+              </div>
+            )
+          }
+
+          return (
+            <div
+              key={msg.id}
+              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+            >
+              <div className="bubble-row">
+                <div className={`card ${isMine ? 'mine' : 'other'}`}>
+                  {!isMine && (
+                    <div className="username">{msg.name}</div>
+                  )}
+
+                  {msg.mediaType === 'audio' ? (
+                    <audio controls src={msg.mediaUrl} />
+                  ) : (
+                    <span className="text">{msg.text}</span>
+                  )}
+
+                  {isMine && (
+                    <button
+                      className="delete"
+                      onClick={() => apagarMensagem(msg.id)}
+                    >
+                      🗑
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <span className={`time ${isMine ? 'right' : 'left'}`}>
+                {formatarDataHora(msg)}
+              </span>
+            </div>
+          )
+        })}
+        <div ref={scrollRef} />
+      </div>
+
+      <div className="input-area">
+        <input
+          ref={inputMessage}
+          className="menssage"
+          placeholder="Digite sua mensagem"
+          onKeyDown={e => e.key === 'Enter' && enviarMensagem()}
+        />
+
+        <button
+          className={`enviar ${gravando ? 'gravando' : ''}`}
+          onClick={gravando ? pararGravacao : iniciarGravacao}
+        >
+          {gravando ? '⏹' : '🎤'}
+        </button>
+
+        <button className="enviar" onClick={enviarMensagem}>
+          ➤
+        </button>
+      </div>
+    </div>
+  )
 }
 
-// =====================
-// 🚀 START SERVER
-// =====================
-const PORT = process.env.PORT || 3001
-server.listen(PORT, () => {
-  console.log(`🔥 API rodando na porta ${PORT}`)
-})
+export default Home
+
