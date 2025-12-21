@@ -4,7 +4,7 @@
   flex-direction: column;
   height: 100vh;
   padding: 12px;
-  background-color: #ece5dd;
+  background-color: #130101;
   box-sizing: border-box;
 }
 
@@ -89,7 +89,7 @@
 }
 
 .card.other {
-  background-color: #ffffff;
+  background-color: #f5efef;
   border-bottom-left-radius: 4px;
 }
 
@@ -158,7 +158,7 @@
 .input-area {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 5px;
   align-items: center;
 }
 
@@ -222,8 +222,8 @@
 }
 
 .date-divider span {
-  background: #d5dbd8;
-  color: #555;
+  background: #e2eee8;
+  color: #635f5f;
   font-size: 12px;
   padding: 4px 12px;
   border-radius: 12px;
