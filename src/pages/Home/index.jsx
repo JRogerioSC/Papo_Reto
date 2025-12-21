@@ -38,6 +38,16 @@ function Home() {
   // =====================
   // 🔔 PUSH NOTIFICATION
   // =====================
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+
+    const rawData = window.atob(base64)
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)))
+  }
+
   async function registrarPushNotifications() {
     try {
       if (!('serviceWorker' in navigator)) return
@@ -52,11 +62,11 @@ function Home() {
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: VAPID_PUBLIC_KEY
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         })
       }
 
-      await axios.post(`${BACKEND_URL}/push/subscribe`, {
+      await axios.post(`${BACKEND_URL}/subscribe`, {
         name,
         subscription
       })
@@ -64,6 +74,7 @@ function Home() {
       console.error('Erro ao registrar push', err)
     }
   }
+
 
   // =====================
   // 🔒 NORMALIZA MENSAGEM
@@ -361,4 +372,3 @@ function Home() {
 }
 
 export default Home
-
