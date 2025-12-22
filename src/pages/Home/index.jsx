@@ -323,10 +323,17 @@ function Home() {
                   )}
 
                   {msg.mediaType === 'audio' ? (
-                    <audio controls src={msg.mediaUrl} />
+                    <div className="audio-wrapper">
+                      <audio
+                        controls
+                        src={msg.mediaUrl}
+                        preload="metadata"
+                      />
+                    </div>
                   ) : (
                     <span className="text">{msg.text}</span>
                   )}
+
 
                   {isMine && (
                     <button
