@@ -30,41 +30,6 @@ function Home() {
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
-  // =====================
-  // 🔔 PUSH
-  // =====================
-  function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-    const rawData = window.atob(base64)
-    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)))
-  }
-
-  async function registrarPushNotifications() {
-    try {
-      if (!('serviceWorker' in navigator)) return
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') return
-
-      const registration = await navigator.serviceWorker.ready
-      let subscription = await registration.pushManager.getSubscription()
-
-      if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        })
-      }
-
-      await axios.post(`${BACKEND_URL}/subscribe`, { name, subscription })
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  // =====================
-  // 🔒 NORMALIZA
-  // =====================
   function normalizarMensagem(msg) {
     return {
       ...msg,
@@ -73,9 +38,6 @@ function Home() {
     }
   }
 
-  // =====================
-  // ⏰ DATA
-  // =====================
   function formatarHora(msg) {
     return new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
       hour: '2-digit',
@@ -83,35 +45,26 @@ function Home() {
     })
   }
 
-  // =====================
-  // 🔌 SOCKET
-  // =====================
   useEffect(() => {
     if (!name) return
 
     async function iniciar() {
-      try {
-        const res = await axios.get(`${BACKEND_URL}/usuarios`)
-        setMessages(res.data.map(normalizarMensagem))
+      const res = await axios.get(`${BACKEND_URL}/usuarios`)
+      setMessages(res.data.map(normalizarMensagem))
 
-        await registrarPushNotifications()
+      socketRef.current = io(BACKEND_URL)
+      socketRef.current.emit('register', name)
 
-        socketRef.current = io(BACKEND_URL)
-        socketRef.current.emit('register', name)
+      socketRef.current.on('nova_mensagem', msg => {
+        const m = normalizarMensagem(msg)
+        setMessages(prev => (prev.some(x => x.id === m.id) ? prev : [...prev, m]))
+      })
 
-        socketRef.current.on('nova_mensagem', msg => {
-          const m = normalizarMensagem(msg)
-          setMessages(prev => (prev.some(x => x.id === m.id) ? prev : [...prev, m]))
-        })
+      socketRef.current.on('mensagem_apagada', id => {
+        setMessages(prev => prev.filter(m => m.id !== id))
+      })
 
-        socketRef.current.on('mensagem_apagada', id => {
-          setMessages(prev => prev.filter(m => m.id !== id))
-        })
-
-        setConectando(false)
-      } catch {
-        setConectando(false)
-      }
+      setConectando(false)
     }
 
     iniciar()
@@ -122,9 +75,6 @@ function Home() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // =====================
-  // 🗑️ APAGAR
-  // =====================
   async function apagarMensagem(id) {
     try {
       await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
@@ -133,40 +83,6 @@ function Home() {
     }
   }
 
-  // =====================
-  // 🎙️ ÁUDIO
-  // =====================
-  async function iniciarGravacao() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    mediaRecorderRef.current = new MediaRecorder(stream)
-    audioChunksRef.current = []
-    enviandoAudioRef.current = false
-
-    mediaRecorderRef.current.ondataavailable = e => audioChunksRef.current.push(e.data)
-    mediaRecorderRef.current.onstop = async () => {
-      if (enviandoAudioRef.current) return
-      enviandoAudioRef.current = true
-
-      const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-      const formData = new FormData()
-      formData.append('audio', blob)
-      formData.append('name', name)
-
-      await axios.post(`${BACKEND_URL}/usuarios/audio`, formData)
-    }
-
-    mediaRecorderRef.current.start()
-    setGravando(true)
-  }
-
-  function pararGravacao() {
-    mediaRecorderRef.current?.stop()
-    setGravando(false)
-  }
-
-  // =====================
-  // 📎 ARQUIVO
-  // =====================
   async function enviarArquivo(file) {
     if (!file) return
     try {
@@ -174,7 +90,6 @@ function Home() {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('name', name)
-
       await axios.post(`${BACKEND_URL}/usuarios/arquivo`, formData)
     } catch {
       toast.error('Erro ao enviar arquivo')
@@ -184,9 +99,6 @@ function Home() {
     }
   }
 
-  // =====================
-  // ✉️ TEXTO
-  // =====================
   async function enviarMensagem() {
     const text = inputMessage.current.value.trim()
     if (!text) return
@@ -228,10 +140,26 @@ function Home() {
                     <video controls className="chat-video" src={msg.mediaUrl} />
                   )}
 
+                  {/* ✅ BLOCO INTEGRADO PARA O CSS DE ARQUIVO */}
                   {msg.mediaType === 'file' && (
-                    <a href={msg.mediaUrl} target="_blank" rel="noreferrer">
-                      📎 {msg.fileName || 'Arquivo'}
-                    </a>
+                    <div className="file-message">
+                      <span className="file-icon">📎</span>
+
+                      <div className="file-info">
+                        <span className="file-name">
+                          {msg.fileName || 'Arquivo'}
+                        </span>
+
+                        <a
+                          href={msg.mediaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="file-download"
+                        >
+                          Baixar
+                        </a>
+                      </div>
+                    </div>
                   )}
 
                   {isMine && (
@@ -273,14 +201,6 @@ function Home() {
           disabled={enviandoArquivo}
         >
           📎
-        </button>
-
-
-        <button
-          className={`enviar ${gravando ? 'gravando' : ''}`}
-          onClick={gravando ? pararGravacao : iniciarGravacao}
-        >
-          {gravando ? '⏹' : '🎤'}
         </button>
 
         <button className="enviar" onClick={enviarMensagem}>
