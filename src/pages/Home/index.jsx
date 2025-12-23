@@ -28,7 +28,6 @@ function Home() {
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
-  /* ===================== PUSH ===================== */
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
@@ -54,7 +53,6 @@ function Home() {
     await axios.post(`${BACKEND_URL}/subscribe`, { name, subscription })
   }
 
-  /* ===================== NORMALIZA ===================== */
   function normalizarMensagem(msg) {
     return {
       id: msg.id,
@@ -74,7 +72,6 @@ function Home() {
     })
   }
 
-  /* ===================== SOCKET ===================== */
   useEffect(() => {
     if (!name) return
 
@@ -109,7 +106,6 @@ function Home() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  /* ===================== TEXTO ===================== */
   async function enviarMensagem() {
     const text = inputMessage.current.value.trim()
     if (!text) return
@@ -117,7 +113,6 @@ function Home() {
     inputMessage.current.value = ''
   }
 
-  /* ===================== ARQUIVO ===================== */
   async function enviarArquivo(file) {
     if (!file) return
     try {
@@ -132,7 +127,6 @@ function Home() {
     }
   }
 
-  /* ===================== ÁUDIO ===================== */
   async function iniciarGravacao() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     mediaRecorderRef.current = new MediaRecorder(stream)
@@ -162,6 +156,16 @@ function Home() {
     setGravando(false)
   }
 
+  async function apagarMensagem(id) {
+    try {
+      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
+        data: { name }
+      })
+    } catch {
+      toast.error('Erro ao apagar mensagem')
+    }
+  }
+
   if (!cadastrado) return null
   if (conectando) return <div>Conectando...</div>
 
@@ -176,10 +180,20 @@ function Home() {
           return (
             <div
               key={msg.id}
-              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+              className={`message-wrapper ${isMine ? 'mine me' : 'other'}`}
             >
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
+                  {isMine && (
+                    <button
+                      className="delete"
+                      onClick={() => apagarMensagem(msg.id)}
+                      title="Apagar"
+                    >
+                      🗑️
+                    </button>
+                  )}
+
                   {!isMine && <div className="username">{msg.name}</div>}
 
                   {msg.text && <span className="text">{msg.text}</span>}

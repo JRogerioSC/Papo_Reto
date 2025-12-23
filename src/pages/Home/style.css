@@ -105,6 +105,7 @@
 
 
 /* ===================== DELETE ===================== */
+
 .delete {
   background: transparent;
   border: none;
@@ -130,6 +131,7 @@
   margin-left: 6px;
   flex-shrink: 0;
 }
+
 
 /* ===================== HORA ===================== */
 .time {
@@ -315,6 +317,7 @@
 /* ===================== BALÃO DE ARQUIVO ===================== */
 .file-message {
   display: flex;
+  max-width: 100px;
   align-items: flex-start;
   gap: 6px;
   padding: 6px 8px;
@@ -363,4 +366,16 @@
 
 .file-download:hover {
   text-decoration: underline;
+}
+
+.chat-video {
+  width: 100%;
+  height: 250px;
+  border-radius: 5px;
+}
+
+.chat-image {
+  width: 100%;
+  height: 250px;
+  border-radius: 5px;
 }
