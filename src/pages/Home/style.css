@@ -4,7 +4,7 @@
   flex-direction: column;
   height: 100vh;
   padding: 12px;
-  background-color: #130101;
+  background-color: #40eb0c;
   box-sizing: border-box;
 }
 
@@ -154,12 +154,14 @@
 .input-area {
   display: flex;
   gap: 8px;
-  margin-top: 5px;
+  margin-top: 15px;
   align-items: center;
 }
 
 .menssage {
   flex: 1;
+  height: 10px;
+
   border-radius: 20px;
   padding: 12px;
   border: none;
