@@ -315,11 +315,14 @@
 /* ===================== BALÃO DE ARQUIVO ===================== */
 .file-message {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  max-width: 260px;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  /* 🔥 nunca ultrapassa a tela */
+  max-width: 85vw;
+
   background: #ffffff;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
 }
@@ -329,27 +332,33 @@
 }
 
 .file-icon {
-  font-size: 26px;
+  font-size: 14px;
+  flex-shrink: 0;
+  /* não encolhe */
 }
 
 .file-info {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+
+  /* 🔥 permite quebrar texto */
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .file-name {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+  /* ❌ remove corte */
+  white-space: normal;
 }
 
 .file-download {
-  font-size: 12px;
+  font-size: 11px;
   color: #0b81ff;
   text-decoration: none;
+  margin-top: 2px;
 }
 
 .file-download:hover {

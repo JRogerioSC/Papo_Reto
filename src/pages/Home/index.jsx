@@ -14,12 +14,10 @@ const VAPID_PUBLIC_KEY =
 
 function Home() {
   const [messages, setMessages] = useState([])
-  const [name, setName] = useState(() => localStorage.getItem('papo_reto_nome') || '')
+  const [name] = useState(() => localStorage.getItem('papo_reto_nome') || '')
   const [cadastrado] = useState(() => !!localStorage.getItem('papo_reto_nome'))
   const [conectando, setConectando] = useState(true)
-
   const [gravando, setGravando] = useState(false)
-  const [enviandoArquivo, setEnviandoArquivo] = useState(false)
 
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
@@ -30,21 +28,53 @@ function Home() {
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
+  /* ===================== PUSH ===================== */
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+    const rawData = window.atob(base64)
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)))
+  }
+
+  async function registrarPushNotifications() {
+    if (!('serviceWorker' in navigator)) return
+    const permission = await Notification.requestPermission()
+    if (permission !== 'granted') return
+
+    const registration = await navigator.serviceWorker.ready
+    let subscription = await registration.pushManager.getSubscription()
+
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      })
+    }
+
+    await axios.post(`${BACKEND_URL}/subscribe`, { name, subscription })
+  }
+
+  /* ===================== NORMALIZA ===================== */
   function normalizarMensagem(msg) {
     return {
-      ...msg,
-      text: msg.text || msg.menssage || '',
-      createdAt: msg.createdAt || msg.created_at || msg.date || new Date().toISOString()
+      id: msg.id,
+      text: msg.text || '',
+      mediaUrl: msg.mediaUrl || null,
+      mediaType: msg.mediaType || null,
+      fileName: msg.fileName || null,
+      name: msg.name,
+      createdAt: msg.createdAt
     }
   }
 
-  function formatarHora(msg) {
-    return new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
+  function formatarHora(date) {
+    return new Date(date).toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit'
     })
   }
 
+  /* ===================== SOCKET ===================== */
   useEffect(() => {
     if (!name) return
 
@@ -52,12 +82,16 @@ function Home() {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
       setMessages(res.data.map(normalizarMensagem))
 
+      await registrarPushNotifications()
+
       socketRef.current = io(BACKEND_URL)
       socketRef.current.emit('register', name)
 
       socketRef.current.on('nova_mensagem', msg => {
         const m = normalizarMensagem(msg)
-        setMessages(prev => (prev.some(x => x.id === m.id) ? prev : [...prev, m]))
+        setMessages(prev =>
+          prev.some(x => x.id === m.id) ? prev : [...prev, m]
+        )
       })
 
       socketRef.current.on('mensagem_apagada', id => {
@@ -75,18 +109,18 @@ function Home() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  async function apagarMensagem(id) {
-    try {
-      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
-    } catch {
-      toast.error('Você só pode apagar suas mensagens')
-    }
+  /* ===================== TEXTO ===================== */
+  async function enviarMensagem() {
+    const text = inputMessage.current.value.trim()
+    if (!text) return
+    await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage: text })
+    inputMessage.current.value = ''
   }
 
+  /* ===================== ARQUIVO ===================== */
   async function enviarArquivo(file) {
     if (!file) return
     try {
-      setEnviandoArquivo(true)
       const formData = new FormData()
       formData.append('file', file)
       formData.append('name', name)
@@ -94,16 +128,38 @@ function Home() {
     } catch {
       toast.error('Erro ao enviar arquivo')
     } finally {
-      setEnviandoArquivo(false)
       fileInputRef.current.value = ''
     }
   }
 
-  async function enviarMensagem() {
-    const text = inputMessage.current.value.trim()
-    if (!text) return
-    await axios.post(`${BACKEND_URL}/usuarios`, { name, menssage: text })
-    inputMessage.current.value = ''
+  /* ===================== ÁUDIO ===================== */
+  async function iniciarGravacao() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaRecorderRef.current = new MediaRecorder(stream)
+    audioChunksRef.current = []
+    enviandoAudioRef.current = false
+
+    mediaRecorderRef.current.ondataavailable = e =>
+      audioChunksRef.current.push(e.data)
+
+    mediaRecorderRef.current.onstop = async () => {
+      if (enviandoAudioRef.current) return
+      enviandoAudioRef.current = true
+
+      const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+      const formData = new FormData()
+      formData.append('audio', blob)
+      formData.append('name', name)
+      await axios.post(`${BACKEND_URL}/usuarios/audio`, formData)
+    }
+
+    mediaRecorderRef.current.start()
+    setGravando(true)
+  }
+
+  function pararGravacao() {
+    mediaRecorderRef.current?.stop()
+    setGravando(false)
   }
 
   if (!cadastrado) return null
@@ -115,16 +171,18 @@ function Home() {
 
       <div className="chat">
         {messages.map(msg => {
-          const isMine = msg.name?.toLowerCase() === name.toLowerCase()
+          const isMine = msg.name.toLowerCase() === name.toLowerCase()
 
           return (
-            <div key={msg.id} className={`message-wrapper ${isMine ? 'mine' : 'other'}`}>
+            <div
+              key={msg.id}
+              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+            >
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
-
                   {!isMine && <div className="username">{msg.name}</div>}
 
-                  {msg.text && <div className="text">{msg.text}</div>}
+                  {msg.text && <span className="text">{msg.text}</span>}
 
                   {msg.mediaType === 'audio' && (
                     <div className="audio-wrapper">
@@ -137,23 +195,20 @@ function Home() {
                   )}
 
                   {msg.mediaType === 'video' && (
-                    <video controls className="chat-video" src={msg.mediaUrl} />
+                    <video controls src={msg.mediaUrl} className="chat-video" />
                   )}
 
-                  {/* ✅ BLOCO INTEGRADO PARA O CSS DE ARQUIVO */}
                   {msg.mediaType === 'file' && (
                     <div className="file-message">
                       <span className="file-icon">📎</span>
-
                       <div className="file-info">
                         <span className="file-name">
                           {msg.fileName || 'Arquivo'}
                         </span>
-
                         <a
                           href={msg.mediaUrl}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="noreferrer"
                           className="file-download"
                         >
                           Baixar
@@ -161,19 +216,12 @@ function Home() {
                       </div>
                     </div>
                   )}
-
-                  {isMine && (
-                    <button className="delete" onClick={() => apagarMensagem(msg.id)}>
-                      🗑
-                    </button>
-                  )}
-
-                  <div className={`time ${isMine ? 'right' : 'left'}`}>
-                    {formatarHora(msg)}
-                  </div>
-
                 </div>
               </div>
+
+              <span className={`time ${isMine ? 'right' : 'left'}`}>
+                {formatarHora(msg.createdAt)}
+              </span>
             </div>
           )
         })}
@@ -198,9 +246,15 @@ function Home() {
         <button
           className="file-button"
           onClick={() => fileInputRef.current.click()}
-          disabled={enviandoArquivo}
         >
           📎
+        </button>
+
+        <button
+          className={`enviar ${gravando ? 'gravando' : ''}`}
+          onClick={gravando ? pararGravacao : iniciarGravacao}
+        >
+          {gravando ? '⏹' : '🎤'}
         </button>
 
         <button className="enviar" onClick={enviarMensagem}>
@@ -212,3 +266,4 @@ function Home() {
 }
 
 export default Home
+
