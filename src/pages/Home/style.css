@@ -282,3 +282,32 @@
 .time.left {
   text-align: left;
 }
+
+/* ===================== BOTÃO ARQUIVO ===================== */
+.file-button {
+  background: #ece5dd;
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.2s;
+}
+
+.file-button:hover {
+  background: #d9d2cb;
+  transform: scale(1.05);
+}
+
+.file-button:active {
+  transform: scale(1.1);
+}
+
+.file-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
