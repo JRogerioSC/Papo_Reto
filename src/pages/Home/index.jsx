@@ -167,7 +167,7 @@ function Home() {
   }
 
   if (!cadastrado) return null
-  if (conectando) return <div>Conectando...</div>
+  if (conectando) return <div>Conectando ao Servidor...</div>
 
   return (
     <div className="container">
