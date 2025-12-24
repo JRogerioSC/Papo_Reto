@@ -61,15 +61,41 @@ function Home() {
       mediaType: msg.mediaType || null,
       fileName: msg.fileName || null,
       name: msg.name,
-      createdAt: msg.createdAt
+      createdAt:
+        msg.createdAt ||
+        msg.created_at ||
+        msg.timestamp ||
+        new Date().toISOString()
     }
   }
 
-  function formatarHora(date) {
-    return new Date(date).toLocaleTimeString('pt-BR', {
+  function formatarDataHora(date) {
+    if (!date) return ''
+
+    const d = new Date(date)
+    if (isNaN(d.getTime())) return ''
+
+    const hoje = new Date()
+    const ontem = new Date()
+    ontem.setDate(hoje.getDate() - 1)
+
+    const mesmaData = (a, b) =>
+      a.getDate() === b.getDate() &&
+      a.getMonth() === b.getMonth() &&
+      a.getFullYear() === b.getFullYear()
+
+    const dataTexto = mesmaData(d, hoje)
+      ? 'Hoje'
+      : mesmaData(d, ontem)
+        ? 'Ontem'
+        : d.toLocaleDateString('pt-BR')
+
+    const horaTexto = d.toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit'
     })
+
+    return `${dataTexto} • ${horaTexto}`
   }
 
   useEffect(() => {
@@ -167,38 +193,6 @@ function Home() {
   }
 
   if (!cadastrado) return null
-
-  if (!cadastrado) {
-    return (
-      <div className="container cadastro">
-        <h2>Entrar no Papo Reto</h2>
-
-        <input
-          placeholder="Digite seu nome"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
-
-        <button
-          onClick={() => {
-            if (!name.trim()) {
-              toast.error('Digite um nome')
-              return
-            }
-
-            localStorage.setItem('papo_reto_nome', name.trim())
-            setCadastrado(true)
-          }}
-        >
-          Cadastrar
-        </button>
-
-        <ToastContainer />
-      </div>
-    )
-  }
-
-
   if (conectando) return <div>Conectando ao Servidor...</div>
 
   return (
@@ -220,53 +214,36 @@ function Home() {
                     <button
                       className="delete"
                       onClick={() => apagarMensagem(msg.id)}
-                      title="Apagar"
                     >
                       🗑️
                     </button>
                   )}
 
                   {!isMine && <div className="username">{msg.name}</div>}
-
                   {msg.text && <span className="text">{msg.text}</span>}
-
                   {msg.mediaType === 'audio' && (
-                    <div className="audio-wrapper">
-                      <audio controls src={msg.mediaUrl} />
-                    </div>
+                    <audio controls src={msg.mediaUrl} />
                   )}
-
                   {msg.mediaType === 'image' && (
                     <img src={msg.mediaUrl} className="chat-image" />
                   )}
-
                   {msg.mediaType === 'video' && (
                     <video controls src={msg.mediaUrl} className="chat-video" />
                   )}
-
                   {msg.mediaType === 'file' && (
                     <div className="file-message">
-                      <span className="file-icon">📎</span>
-                      <div className="file-info">
-                        <span className="file-name">
-                          {msg.fileName || 'Arquivo'}
-                        </span>
-                        <a
-                          href={msg.mediaUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="file-download"
-                        >
-                          Baixar
-                        </a>
-                      </div>
+                      <span>📎</span>
+                      <a href={msg.mediaUrl} target="_blank" rel="noreferrer">
+                        {msg.fileName || 'Arquivo'}
+                      </a>
                     </div>
                   )}
                 </div>
               </div>
 
+              {/* ✅ DATA + HORA FORA DO BALÃO (USANDO SEU CSS .time) */}
               <span className={`time ${isMine ? 'right' : 'left'}`}>
-                {formatarHora(msg.createdAt)}
+                {formatarDataHora(msg.createdAt)}
               </span>
             </div>
           )

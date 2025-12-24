@@ -47,7 +47,7 @@
 
 /* ===================== BALÃO ===================== */
 .card {
-  max-width: 80%;
+  max-width: 100%;
   padding: 10px 14px;
   border-radius: 14px;
   font-size: 14px;
@@ -99,7 +99,7 @@
 }
 
 .audio-wrapper audio {
-  max-width: 220px;
+  max-width: 200px;
   display: block;
 }
 
