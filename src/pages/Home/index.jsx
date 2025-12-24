@@ -167,6 +167,38 @@ function Home() {
   }
 
   if (!cadastrado) return null
+
+  if (!cadastrado) {
+    return (
+      <div className="container cadastro">
+        <h2>Entrar no Papo Reto</h2>
+
+        <input
+          placeholder="Digite seu nome"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+
+        <button
+          onClick={() => {
+            if (!name.trim()) {
+              toast.error('Digite um nome')
+              return
+            }
+
+            localStorage.setItem('papo_reto_nome', name.trim())
+            setCadastrado(true)
+          }}
+        >
+          Cadastrar
+        </button>
+
+        <ToastContainer />
+      </div>
+    )
+  }
+
+
   if (conectando) return <div>Conectando ao Servidor...</div>
 
   return (
@@ -280,4 +312,3 @@ function Home() {
 }
 
 export default Home
-
