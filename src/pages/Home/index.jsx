@@ -98,15 +98,18 @@ function Home() {
   }
 
   useEffect(() => {
+    let ativo = true
+
     async function validarUsuario() {
       if (!name) {
+        localStorage.removeItem('papo_reto_nome')
         window.location.href = '/cadastro'
         return
       }
 
       try {
         const res = await axios.get(
-          `${BACKEND_URL}/usuarios/validar/${name}`
+          `${BACKEND_URL}/usuarios/validar/${encodeURIComponent(name)}`
         )
 
         if (!res.data.exists) {
@@ -115,14 +118,18 @@ function Home() {
           return
         }
 
-        iniciarChat()
-      } catch {
-        toast.error('Erro ao validar usuário')
+        await iniciarChat()
+      } catch (err) {
+        console.error(err)
+        localStorage.removeItem('papo_reto_nome')
+        window.location.href = '/cadastro'
       }
     }
 
     async function iniciarChat() {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
+      if (!ativo) return
+
       setMessages(res.data.map(normalizarMensagem))
 
       await registrarPushNotifications()
@@ -146,8 +153,12 @@ function Home() {
 
     validarUsuario()
 
-    return () => socketRef.current?.disconnect()
+    return () => {
+      ativo = false
+      socketRef.current?.disconnect()
+    }
   }, [name])
+
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
