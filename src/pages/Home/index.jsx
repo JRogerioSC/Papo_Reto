@@ -15,7 +15,6 @@ const VAPID_PUBLIC_KEY =
 function Home() {
   const [messages, setMessages] = useState([])
   const [name] = useState(() => localStorage.getItem('papo_reto_nome') || '')
-  const [cadastrado] = useState(() => !!localStorage.getItem('papo_reto_nome'))
   const [conectando, setConectando] = useState(true)
   const [gravando, setGravando] = useState(false)
 
@@ -99,9 +98,30 @@ function Home() {
   }
 
   useEffect(() => {
-    if (!name) return
+    async function validarUsuario() {
+      if (!name) {
+        window.location.href = '/cadastro'
+        return
+      }
 
-    async function iniciar() {
+      try {
+        const res = await axios.get(
+          `${BACKEND_URL}/usuarios/validar/${name}`
+        )
+
+        if (!res.data.exists) {
+          localStorage.removeItem('papo_reto_nome')
+          window.location.href = '/cadastro'
+          return
+        }
+
+        iniciarChat()
+      } catch {
+        toast.error('Erro ao validar usuário')
+      }
+    }
+
+    async function iniciarChat() {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
       setMessages(res.data.map(normalizarMensagem))
 
@@ -124,7 +144,8 @@ function Home() {
       setConectando(false)
     }
 
-    iniciar()
+    validarUsuario()
+
     return () => socketRef.current?.disconnect()
   }, [name])
 
@@ -192,7 +213,6 @@ function Home() {
     }
   }
 
-  if (!cadastrado) return null
   if (conectando) return <div>Conectando ao Servidor...</div>
 
   return (
