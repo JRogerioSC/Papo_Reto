@@ -135,7 +135,7 @@ function Home() {
       await registrarPushNotifications()
 
       socketRef.current = io(BACKEND_URL)
-      socketRef.current.emit('register', name)
+      socketRef.current.emit('register', name.trim().toLowerCase())
 
       socketRef.current.on('nova_mensagem', msg => {
         const m = normalizarMensagem(msg)
