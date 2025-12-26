@@ -7,6 +7,34 @@ function Cadastro({ onCadastro }) {
     const [name, setName] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [naoExiste, setNaoExiste] = useState(false)
+
+    async function entrar() {
+        const nome = name.trim()
+        if (!nome) return
+
+        try {
+            setLoading(true)
+            setError('')
+            setNaoExiste(false)
+
+            const res = await axios.post(`${BACKEND_URL}/usuarios/validar`, {
+                name: nome
+            })
+
+            localStorage.setItem('papo_reto_nome', res.data.name)
+            onCadastro(res.data.name)
+        } catch (err) {
+            if (err.response?.status === 404) {
+                setNaoExiste(true)
+                setError('Usuário não encontrado')
+            } else {
+                setError('Erro ao validar usuário')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
 
     async function cadastrar() {
         const nome = name.trim()
@@ -16,22 +44,18 @@ function Cadastro({ onCadastro }) {
             setLoading(true)
             setError('')
 
-            // 🔎 tenta validar o usuário EXISTENTE
-            const res = await axios.post(`${BACKEND_URL}/usuarios`, {
-                name: nome,
-                menssage: ' ' // ⚠️ força backend a NÃO criar mensagem
+            const res = await axios.post(`${BACKEND_URL}/usuarios/cadastrar`, {
+                name: nome
             })
 
-            if (!res.data?.id || !res.data?.name) {
-                throw new Error('Usuário inválido')
-            }
-
-            // ✅ usuário validado
             localStorage.setItem('papo_reto_nome', res.data.name)
             onCadastro(res.data.name)
         } catch (err) {
-            setError('Usuário não encontrado. Cadastre um nome válido.')
-            localStorage.removeItem('papo_reto_nome')
+            if (err.response?.status === 409) {
+                setError('Nome já está em uso')
+            } else {
+                setError('Erro ao cadastrar usuário')
+            }
         } finally {
             setLoading(false)
         }
@@ -51,11 +75,21 @@ function Cadastro({ onCadastro }) {
 
             {error && <span className="erro">{error}</span>}
 
-            <button onClick={cadastrar} disabled={loading}>
-                {loading ? 'Verificando...' : 'Entrar'}
-            </button>
+            {/* BOTÕES */}
+            {!naoExiste && (
+                <button onClick={entrar} disabled={loading}>
+                    {loading ? 'Verificando...' : 'Entrar'}
+                </button>
+            )}
+
+            {naoExiste && (
+                <button onClick={cadastrar} disabled={loading}>
+                    {loading ? 'Cadastrando...' : 'Cadastrar'}
+                </button>
+            )}
         </div>
     )
 }
 
 export default Cadastro
+
