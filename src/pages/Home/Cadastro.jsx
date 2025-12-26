@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
@@ -8,6 +8,31 @@ function Cadastro({ onCadastro }) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [naoExiste, setNaoExiste] = useState(false)
+
+    // 🔥 VERIFICA AUTOMÁTICA AO ABRIR A PÁGINA
+    useEffect(() => {
+        const nomeSalvo = localStorage.getItem('papo_reto_nome')
+        if (!nomeSalvo) return
+
+        async function validarSalvo() {
+            try {
+                const res = await axios.post(`${BACKEND_URL}/usuarios/validar`, {
+                    name: nomeSalvo
+                })
+
+                // ✅ usuário ainda existe
+                onCadastro(res.data.name)
+            } catch (err) {
+                // ❌ usuário foi apagado do banco
+                localStorage.removeItem('papo_reto_nome')
+                setName('')
+                setNaoExiste(false)
+                setError('Seu usuário foi removido. Cadastre novamente.')
+            }
+        }
+
+        validarSalvo()
+    }, [onCadastro])
 
     async function entrar() {
         const nome = name.trim()
@@ -28,6 +53,7 @@ function Cadastro({ onCadastro }) {
             if (err.response?.status === 404) {
                 setNaoExiste(true)
                 setError('Usuário não encontrado')
+                localStorage.removeItem('papo_reto_nome')
             } else {
                 setError('Erro ao validar usuário')
             }
@@ -75,7 +101,6 @@ function Cadastro({ onCadastro }) {
 
             {error && <span className="erro">{error}</span>}
 
-            {/* BOTÕES */}
             {!naoExiste && (
                 <button onClick={entrar} disabled={loading}>
                     {loading ? 'Verificando...' : 'Entrar'}
@@ -92,4 +117,3 @@ function Cadastro({ onCadastro }) {
 }
 
 export default Cadastro
-
