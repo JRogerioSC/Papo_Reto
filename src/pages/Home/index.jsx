@@ -28,20 +28,21 @@ function Home() {
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
 
-  /* ===================== INIT CHAT ===================== */
+  /* ===================== INIT ===================== */
   useEffect(() => {
-    if (!cadastrado) return
+    if (!cadastrado || !name) return
 
     async function iniciar() {
       try {
         setConectando(true)
 
-        // 🔹 carregar histórico
-        const res = await axios.get(`${BACKEND_URL}/usuarios`)
+        const res = await axios.get(`${BACKEND_URL}/mensagens`)
         setMessages(res.data)
 
-        // 🔹 socket
-        socketRef.current = io(BACKEND_URL)
+        socketRef.current = io(BACKEND_URL, {
+          transports: ['websocket']
+        })
+
         socketRef.current.emit('register', name)
 
         socketRef.current.on('nova_mensagem', msg => {
@@ -53,8 +54,11 @@ function Home() {
         socketRef.current.on('mensagem_apagada', id => {
           setMessages(prev => prev.filter(m => m.id !== id))
         })
-      } catch {
+      } catch (err) {
         toast.error('Erro ao conectar')
+        localStorage.removeItem('papo_reto_nome')
+        setCadastrado(false)
+        setName('')
       } finally {
         setConectando(false)
       }
@@ -69,19 +73,23 @@ function Home() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  /* ===================== AÇÕES ===================== */
+  /* ===================== TEXTO ===================== */
   async function enviarMensagem() {
     const text = inputMessage.current.value.trim()
     if (!text) return
 
-    await axios.post(`${BACKEND_URL}/usuarios`, {
-      name,
-      menssage: text
-    })
-
-    inputMessage.current.value = ''
+    try {
+      await axios.post(`${BACKEND_URL}/mensagens`, {
+        name,
+        text
+      })
+      inputMessage.current.value = ''
+    } catch {
+      toast.error('Erro ao enviar mensagem')
+    }
   }
 
+  /* ===================== ARQUIVO ===================== */
   async function enviarArquivo(file) {
     if (!file) return
 
@@ -90,7 +98,7 @@ function Home() {
     formData.append('name', name)
 
     try {
-      await axios.post(`${BACKEND_URL}/usuarios/arquivo`, formData)
+      await axios.post(`${BACKEND_URL}/mensagens/arquivo`, formData)
     } catch {
       toast.error('Erro ao enviar arquivo')
     } finally {
@@ -98,6 +106,7 @@ function Home() {
     }
   }
 
+  /* ===================== ÁUDIO ===================== */
   async function iniciarGravacao() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     mediaRecorderRef.current = new MediaRecorder(stream)
@@ -112,7 +121,11 @@ function Home() {
       formData.append('audio', blob)
       formData.append('name', name)
 
-      await axios.post(`${BACKEND_URL}/usuarios/audio`, formData)
+      try {
+        await axios.post(`${BACKEND_URL}/mensagens/audio`, formData)
+      } catch {
+        toast.error('Erro ao enviar áudio')
+      }
     }
 
     mediaRecorderRef.current.start()
@@ -124,9 +137,10 @@ function Home() {
     setGravando(false)
   }
 
+  /* ===================== DELETE ===================== */
   async function apagarMensagem(id) {
     try {
-      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
+      await axios.delete(`${BACKEND_URL}/mensagens/${id}`, {
         data: { name }
       })
     } catch {
@@ -147,9 +161,7 @@ function Home() {
     )
   }
 
-  if (conectando) {
-    return <div>Conectando ao servidor...</div>
-  }
+  if (conectando) return <div>Conectando...</div>
 
   return (
     <div className="container">
@@ -166,10 +178,7 @@ function Home() {
             >
               <div className={`card ${isMine ? 'mine' : 'other'}`}>
                 {isMine && (
-                  <button
-                    className="delete"
-                    onClick={() => apagarMensagem(msg.id)}
-                  >
+                  <button className="delete" onClick={() => apagarMensagem(msg.id)}>
                     🗑️
                   </button>
                 )}
@@ -177,31 +186,15 @@ function Home() {
                 {!isMine && <div className="username">{msg.name}</div>}
                 {msg.text && <span className="text">{msg.text}</span>}
 
-                {msg.mediaType === 'audio' && (
-                  <audio controls src={msg.mediaUrl} />
-                )}
-
-                {msg.mediaType === 'image' && (
-                  <img src={msg.mediaUrl} className="chat-image" />
-                )}
-
-                {msg.mediaType === 'video' && (
-                  <video controls src={msg.mediaUrl} className="chat-video" />
-                )}
-
+                {msg.mediaType === 'audio' && <audio controls src={msg.mediaUrl} />}
+                {msg.mediaType === 'image' && <img src={msg.mediaUrl} />}
+                {msg.mediaType === 'video' && <video controls src={msg.mediaUrl} />}
                 {msg.mediaType === 'file' && (
                   <a href={msg.mediaUrl} target="_blank" rel="noreferrer">
                     📎 Arquivo
                   </a>
                 )}
               </div>
-
-              <span className="time">
-                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
             </div>
           )
         })}
@@ -226,9 +219,7 @@ function Home() {
         <button onClick={gravando ? pararGravacao : iniciarGravacao}>
           {gravando ? '⏹' : '🎤'}
         </button>
-        <button className="enviar" onClick={enviarMensagem}>
-          ➤
-        </button>
+        <button onClick={enviarMensagem}>➤</button>
       </div>
     </div>
   )

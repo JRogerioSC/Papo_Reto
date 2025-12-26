@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
 
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
@@ -8,31 +8,6 @@ function Cadastro({ onCadastro }) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [naoExiste, setNaoExiste] = useState(false)
-
-    // 🔥 VERIFICA AUTOMÁTICA AO ABRIR A PÁGINA
-    useEffect(() => {
-        const nomeSalvo = localStorage.getItem('papo_reto_nome')
-        if (!nomeSalvo) return
-
-        async function validarSalvo() {
-            try {
-                const res = await axios.post(`${BACKEND_URL}/usuarios/validar`, {
-                    name: nomeSalvo
-                })
-
-                // ✅ usuário ainda existe
-                onCadastro(res.data.name)
-            } catch (err) {
-                // ❌ usuário foi apagado do banco
-                localStorage.removeItem('papo_reto_nome')
-                setName('')
-                setNaoExiste(false)
-                setError('Seu usuário foi removido. Cadastre novamente.')
-            }
-        }
-
-        validarSalvo()
-    }, [onCadastro])
 
     async function entrar() {
         const nome = name.trim()
@@ -47,13 +22,14 @@ function Cadastro({ onCadastro }) {
                 name: nome
             })
 
-            localStorage.setItem('papo_reto_nome', res.data.name)
-            onCadastro(res.data.name)
+            if (typeof onCadastro === 'function') {
+                localStorage.setItem('papo_reto_nome', res.data.name)
+                onCadastro(res.data.name)
+            }
         } catch (err) {
             if (err.response?.status === 404) {
                 setNaoExiste(true)
                 setError('Usuário não encontrado')
-                localStorage.removeItem('papo_reto_nome')
             } else {
                 setError('Erro ao validar usuário')
             }
@@ -74,8 +50,10 @@ function Cadastro({ onCadastro }) {
                 name: nome
             })
 
-            localStorage.setItem('papo_reto_nome', res.data.name)
-            onCadastro(res.data.name)
+            if (typeof onCadastro === 'function') {
+                localStorage.setItem('papo_reto_nome', res.data.name)
+                onCadastro(res.data.name)
+            }
         } catch (err) {
             if (err.response?.status === 409) {
                 setError('Nome já está em uso')
@@ -92,7 +70,6 @@ function Cadastro({ onCadastro }) {
             <h2>Digite seu nome</h2>
 
             <input
-                type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Seu nome"
