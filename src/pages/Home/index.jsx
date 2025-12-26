@@ -15,6 +15,7 @@ const VAPID_PUBLIC_KEY =
 function Home() {
   const [messages, setMessages] = useState([])
   const [name] = useState(() => localStorage.getItem('papo_reto_nome') || '')
+  const [cadastrado] = useState(() => !!localStorage.getItem('papo_reto_nome'))
   const [conectando, setConectando] = useState(true)
   const [gravando, setGravando] = useState(false)
 
@@ -98,44 +99,16 @@ function Home() {
   }
 
   useEffect(() => {
-    let ativo = true
+    if (!name) return
 
-    async function validarUsuario() {
-      if (!name) {
-        localStorage.removeItem('papo_reto_nome')
-        window.location.href = '/cadastro'
-        return
-      }
-
-      try {
-        const res = await axios.get(
-          `${BACKEND_URL}/usuarios/validar/${encodeURIComponent(name)}`
-        )
-
-        if (!res.data.exists) {
-          localStorage.removeItem('papo_reto_nome')
-          window.location.href = '/cadastro'
-          return
-        }
-
-        await iniciarChat()
-      } catch (err) {
-        console.error(err)
-        localStorage.removeItem('papo_reto_nome')
-        window.location.href = '/cadastro'
-      }
-    }
-
-    async function iniciarChat() {
+    async function iniciar() {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
-      if (!ativo) return
-
       setMessages(res.data.map(normalizarMensagem))
 
       await registrarPushNotifications()
 
       socketRef.current = io(BACKEND_URL)
-      socketRef.current.emit('register', name.trim().toLowerCase())
+      socketRef.current.emit('register', name)
 
       socketRef.current.on('nova_mensagem', msg => {
         const m = normalizarMensagem(msg)
@@ -151,14 +124,9 @@ function Home() {
       setConectando(false)
     }
 
-    validarUsuario()
-
-    return () => {
-      ativo = false
-      socketRef.current?.disconnect()
-    }
+    iniciar()
+    return () => socketRef.current?.disconnect()
   }, [name])
-
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -224,6 +192,7 @@ function Home() {
     }
   }
 
+  if (!cadastrado) return null
   if (conectando) return <div>Conectando ao Servidor...</div>
 
   return (
