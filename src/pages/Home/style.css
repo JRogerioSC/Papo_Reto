@@ -230,6 +230,7 @@
 /* ===================== TELA DE CADASTRO ===================== */
 .cadastro {
   display: flex;
+  background-color: red;
   flex-direction: column;
   justify-content: center;
   align-items: center;

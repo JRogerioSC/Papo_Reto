@@ -185,7 +185,7 @@ function Home() {
         <ToastContainer />
         <h2>Papo Reto</h2>
         <input ref={inputLogin} placeholder="Digite seu nome" />
-        <button onClick={entrar}>Entrar</button>
+        <button onClick={entrar}>ENTRAR</button>
       </div>
     )
   }
