@@ -13,21 +13,42 @@ const VAPID_PUBLIC_KEY =
   'BCDQq4OUvCl6IS2j7X0PJuMwvUT8wFT5Nb6i5WZ0Q8ojL_gKNxEoyH3wsxuCX2AV7R4RyalvZlk11FPz_tekPuY'
 
 function Home() {
+  // 🔐 LOGIN
+  const [name, setName] = useState(
+    () => localStorage.getItem('papo_reto_nome') || ''
+  )
+  const [logado, setLogado] = useState(!!name)
+
+  // 💬 CHAT
   const [messages, setMessages] = useState([])
-  const [name] = useState(() => localStorage.getItem('papo_reto_nome') || '')
-  const [cadastrado] = useState(() => !!localStorage.getItem('papo_reto_nome'))
-  const [conectando, setConectando] = useState(true)
+  const [conectando, setConectando] = useState(false)
   const [gravando, setGravando] = useState(false)
 
-  const mediaRecorderRef = useRef(null)
-  const audioChunksRef = useRef([])
-  const enviandoAudioRef = useRef(false)
-
+  const inputLogin = useRef(null)
   const inputMessage = useRef(null)
   const fileInputRef = useRef(null)
   const scrollRef = useRef(null)
   const socketRef = useRef(null)
 
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+
+  // ======================
+  // 🔐 LOGIN
+  // ======================
+  function entrar() {
+    const nome = inputLogin.current.value.trim()
+    if (!nome) return toast.error('Digite seu nome')
+
+    localStorage.setItem('papo_reto_nome', nome)
+    setName(nome)
+    setLogado(true)
+    setConectando(true)
+  }
+
+  // ======================
+  // 🔔 PUSH
+  // ======================
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
@@ -61,45 +82,23 @@ function Home() {
       mediaType: msg.mediaType || null,
       fileName: msg.fileName || null,
       name: msg.name,
-      createdAt:
-        msg.createdAt ||
-        msg.created_at ||
-        msg.timestamp ||
-        new Date().toISOString()
+      createdAt: msg.createdAt || msg.created_at || msg.timestamp
     }
   }
 
   function formatarDataHora(date) {
-    if (!date) return ''
-
     const d = new Date(date)
-    if (isNaN(d.getTime())) return ''
-
-    const hoje = new Date()
-    const ontem = new Date()
-    ontem.setDate(hoje.getDate() - 1)
-
-    const mesmaData = (a, b) =>
-      a.getDate() === b.getDate() &&
-      a.getMonth() === b.getMonth() &&
-      a.getFullYear() === b.getFullYear()
-
-    const dataTexto = mesmaData(d, hoje)
-      ? 'Hoje'
-      : mesmaData(d, ontem)
-        ? 'Ontem'
-        : d.toLocaleDateString('pt-BR')
-
-    const horaTexto = d.toLocaleTimeString('pt-BR', {
+    return d.toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit'
     })
-
-    return `${dataTexto} • ${horaTexto}`
   }
 
+  // ======================
+  // 🚀 INICIAR CHAT
+  // ======================
   useEffect(() => {
-    if (!name) return
+    if (!logado) return
 
     async function iniciar() {
       const res = await axios.get(`${BACKEND_URL}/usuarios`)
@@ -126,7 +125,7 @@ function Home() {
 
     iniciar()
     return () => socketRef.current?.disconnect()
-  }, [name])
+  }, [logado, name])
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -141,31 +140,22 @@ function Home() {
 
   async function enviarArquivo(file) {
     if (!file) return
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('name', name)
-      await axios.post(`${BACKEND_URL}/usuarios/arquivo`, formData)
-    } catch {
-      toast.error('Erro ao enviar arquivo')
-    } finally {
-      fileInputRef.current.value = ''
-    }
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('name', name)
+    await axios.post(`${BACKEND_URL}/usuarios/arquivo`, formData)
+    fileInputRef.current.value = ''
   }
 
   async function iniciarGravacao() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     mediaRecorderRef.current = new MediaRecorder(stream)
     audioChunksRef.current = []
-    enviandoAudioRef.current = false
 
     mediaRecorderRef.current.ondataavailable = e =>
       audioChunksRef.current.push(e.data)
 
     mediaRecorderRef.current.onstop = async () => {
-      if (enviandoAudioRef.current) return
-      enviandoAudioRef.current = true
-
       const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
       const formData = new FormData()
       formData.append('audio', blob)
@@ -183,18 +173,28 @@ function Home() {
   }
 
   async function apagarMensagem(id) {
-    try {
-      await axios.delete(`${BACKEND_URL}/usuarios/${id}`, {
-        data: { name }
-      })
-    } catch {
-      toast.error('Erro ao apagar mensagem')
-    }
+    await axios.delete(`${BACKEND_URL}/usuarios/${id}`, { data: { name } })
   }
 
-  if (!cadastrado) return null
-  if (conectando) return <div>Conectando ao Servidor...</div>
+  // ======================
+  // 🔐 TELA DE LOGIN
+  // ======================
+  if (!logado) {
+    return (
+      <div className="cadastro">
+        <ToastContainer />
+        <h2>Papo Reto</h2>
+        <input ref={inputLogin} placeholder="Digite seu nome" />
+        <button onClick={entrar}>Entrar</button>
+      </div>
+    )
+  }
 
+  if (conectando) return <div>Conectando ao servidor...</div>
+
+  // ======================
+  // 💬 CHAT
+  // ======================
   return (
     <div className="container">
       <ToastContainer />
@@ -206,7 +206,7 @@ function Home() {
           return (
             <div
               key={msg.id}
-              className={`message-wrapper ${isMine ? 'mine me' : 'other'}`}
+              className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
             >
               <div className="bubble-row">
                 <div className={`card ${isMine ? 'mine' : 'other'}`}>
@@ -222,7 +222,9 @@ function Home() {
                   {!isMine && <div className="username">{msg.name}</div>}
                   {msg.text && <span className="text">{msg.text}</span>}
                   {msg.mediaType === 'audio' && (
-                    <audio controls src={msg.mediaUrl} />
+                    <div className="audio-wrapper">
+                      <audio controls src={msg.mediaUrl} />
+                    </div>
                   )}
                   {msg.mediaType === 'image' && (
                     <img src={msg.mediaUrl} className="chat-image" />
@@ -230,18 +232,9 @@ function Home() {
                   {msg.mediaType === 'video' && (
                     <video controls src={msg.mediaUrl} className="chat-video" />
                   )}
-                  {msg.mediaType === 'file' && (
-                    <div className="file-message">
-                      <span>📎</span>
-                      <a href={msg.mediaUrl} target="_blank" rel="noreferrer">
-                        {msg.fileName || 'Arquivo'}
-                      </a>
-                    </div>
-                  )}
                 </div>
               </div>
 
-              {/* ✅ DATA + HORA FORA DO BALÃO (USANDO SEU CSS .time) */}
               <span className={`time ${isMine ? 'right' : 'left'}`}>
                 {formatarDataHora(msg.createdAt)}
               </span>
@@ -261,8 +254,8 @@ function Home() {
 
         <input
           type="file"
-          ref={fileInputRef}
           hidden
+          ref={fileInputRef}
           onChange={e => enviarArquivo(e.target.files[0])}
         />
 
@@ -289,4 +282,3 @@ function Home() {
 }
 
 export default Home
-
