@@ -255,6 +255,11 @@
   cursor: pointer;
 }
 
+.cadastro button:hover {
+  color: #66da08;
+  transform: scale(1.05);
+}
+
 .username {
   font-size: 12px;
   font-weight: 600;
