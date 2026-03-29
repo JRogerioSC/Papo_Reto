@@ -321,7 +321,7 @@
         \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
-            \"site\": \"https://pap0reto.netlify.app/\"
+            \"site\": \"https://pap0reto.netlify.app\"
         }
     }]
     
@@ -338,9 +338,10 @@
     <string name="fallback_menu_item_copy_link">Copy link</string>
     <string name="fallback_menu_item_open_in_browser">Open in browser</string>
     <string name="fallback_menu_item_share_link">Share link</string>
+    <string name="fullScopeUrl" translatable="false">https://pap0reto.netlify.app/</string>
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
-    <string name="hostName" translatable="false">pap0reto.netlify.app/</string>
-    <string name="launchUrl" translatable="false">https://pap0reto.netlify.app//</string>
+    <string name="hostName" translatable="false">pap0reto.netlify.app</string>
+    <string name="launchUrl" translatable="false">https://pap0reto.netlify.app/</string>
     <string name="launcherName" translatable="false">Papo_Reto</string>
     <string name="manage_space_no_data_toast">This app holds no browsing data.</string>
     <string name="manage_space_not_supported_toast">This app\'s data is stored in %1$s.</string>

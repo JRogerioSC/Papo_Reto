@@ -20,6 +20,7 @@ raw web_app_manifest
 string appName
 string assetStatements
 string fallbackType
+string fullScopeUrl
 string generatorApp
 string hostName
 string launchUrl

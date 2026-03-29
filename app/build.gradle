@@ -22,7 +22,7 @@ plugins {
 
 def twaManifest = [
     applicationId: 'app.netlify.pap0reto.twa',
-    hostName: 'pap0reto.netlify.app/', // The domain being opened in the TWA.
+    hostName: 'pap0reto.netlify.app', // The domain being opened in the TWA.
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: 'Papo_Reto', // The application name.
     launcherName: 'Papo_Reto', // The name shown on the Android Launcher.
@@ -57,8 +57,8 @@ android {
         applicationId "app.netlify.pap0reto.twa"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 5
-        versionName "5"
+        versionCode 1
+        versionName "1"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -79,6 +79,9 @@ android {
             resValue "string", "webManifestUrl", 'https://pap0reto.netlify.app/manifest.json'
         
 
+        
+            // This is used by Meta Quest.
+            resValue "string", "fullScopeUrl", 'https://pap0reto.netlify.app/'
         
 
         
