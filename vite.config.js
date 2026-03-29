@@ -18,7 +18,7 @@ export default defineConfig({
         icons: [
           {
             src: '/logo192.png',
-            sizes: '192x192',
+            sizes: '512x512',
             type: 'image/png'
           },
           {
