@@ -8,7 +8,7 @@
     <!-- Value from default config. -->
     <bool name="enableSiteSettingsShortcut">true</bool>
     <!-- Value from default config. -->
-    <color name="backgroundColor">#FFFFFF</color>
+    <color name="backgroundColor">#000000</color>
     <!-- Value from default config. -->
     <color name="colorPrimary">#000000</color>
     <!-- Value from default config. -->
@@ -27,8 +27,6 @@
     <string name="appName" translatable="false">Papo_Reto</string>
     <!-- Value from default config. -->
     <string name="fallbackType" translatable="false">customtabs</string>
-    <!-- Value from default config. -->
-    <string name="fullScopeUrl" translatable="false">https://pap0reto.netlify.app/</string>
     <!-- Value from default config. -->
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
     <!-- Value from default config. -->

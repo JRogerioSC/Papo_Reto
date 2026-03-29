@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import groovy.xml.MarkupBuilder
 
 plugins {
@@ -31,7 +32,7 @@ def twaManifest = [
     navigationColorDark: '#000000', // The color used for the dark navbar.
     navigationDividerColor: '#000000', // The navbar divider color.
     navigationDividerColorDark: '#000000', // The dark navbar divider color.
-    backgroundColor: '#FFFFFF', // The color used for the splash screen background.
+    backgroundColor: '#000000', // The color used for the splash screen background.
     enableNotifications: true, // Set to true to enable notification delegation.
     // Every shortcut must include the following fields:
     // - name: String that will show up in the shortcut.
@@ -56,8 +57,8 @@ android {
         applicationId "app.netlify.pap0reto.twa"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 4
-        versionName "4"
+        versionCode 5
+        versionName "5"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -69,13 +70,18 @@ android {
         def launchUrl = "https://" + twaManifest.hostName + twaManifest.launchUrl
         resValue "string", "launchUrl", launchUrl
 
-        // The URL the Web Manifest for the Progressive Web App that the TWA points to. This
-        // is used by Chrome OS and Meta Quest to open the Web version of the PWA instead of
-        // the TWA, as it will probably give a better user experience for non-mobile devices.
-        resValue "string", "webManifestUrl", 'https://pap0reto.netlify.app/manifest.json'
+        
 
-        // This is used by Meta Quest.
-        resValue "string", "fullScopeUrl", 'https://pap0reto.netlify.app/'
+        
+            // The URL the Web Manifest for the Progressive Web App that the TWA points to. This
+            // is used by Chrome OS and Meta Quest to open the Web version of the PWA instead of
+            // the TWA, as it will probably give a better user experience for non-mobile devices.
+            resValue "string", "webManifestUrl", 'https://pap0reto.netlify.app/manifest.json'
+        
+
+        
+
+        
 
         // The hostname is used when building the intent-filter, so the TWA is able to
         // handle Intents to open host url of the application.
@@ -138,6 +144,8 @@ android {
 
         resValue "bool", "enableSiteSettingsShortcut", twaManifest.enableSiteSettingsShortcut
         resValue "string", "orientation", twaManifest.orientation
+
+        
     }
     buildTypes {
         release {
@@ -153,13 +161,13 @@ android {
     }
 }
 
-task generateShortcutsFile {
+task generateShorcutsFile {
     assert twaManifest.shortcuts.size() < 5, "You can have at most 4 shortcuts."
     twaManifest.shortcuts.eachWithIndex { s, i ->
         assert s.name != null, 'Missing `name` in shortcut #' + i
         assert s.short_name != null, 'Missing `short_name` in shortcut #' + i
-        assert s.url != null, 'Missing `url` in shortcut #' + i
-        assert s.icon != null, 'Missing `icon` in shortcut #' + i
+        assert s.url != null, 'Missing `icon` in shortcut #' + i
+        assert s.icon != null, 'Missing `url` in shortcut #' + i
     }
 
     def shortcutsFile = new File("$projectDir/src/main/res/xml", "shortcuts.xml")
@@ -188,16 +196,15 @@ task generateShortcutsFile {
     shortcutsFile.text = xmlWriter.toString() + '\n'
 }
 
-preBuild.dependsOn(generateShortcutsFile)
+preBuild.dependsOn(generateShorcutsFile)
 
 repositories {
-    google()
-    mavenCentral()
+    
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+        implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+    
 }
-
