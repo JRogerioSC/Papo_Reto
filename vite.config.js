@@ -7,18 +7,32 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png'], // garante que os ícones sejam incluídos
+
+      // ✅ importante pra funcionar bem no Android / TWA
+      workbox: {
+        navigateFallback: '/index.html'
+      },
+
+      includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png'],
+
       manifest: {
         name: 'Papo Reto',
         short_name: 'Papo Reto',
-        start_url: '.',               // melhor que '/' para TWA, evita mostrar a barra de URL
-        display: 'standalone',       // abre como app sem barra de navegador
+
+        // ✅ CORRETO para TWA
+        start_url: '/',
+
+        scope: '/',
+
+        display: 'standalone',
+
         background_color: '#000000',
         theme_color: '#000000',
+
         icons: [
           {
             src: '/logo192.png',
-            sizes: '512x512',
+            sizes: '192x192',
             type: 'image/png'
           },
           {
