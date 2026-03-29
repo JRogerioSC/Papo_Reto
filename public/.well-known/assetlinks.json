@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.rogerio.paporeto",
+            "sha256_cert_fingerprints": [
+                "CA:A3:C5:8D:D9:5C:AD:21:24:21:58:60:DC:55:E3:6B:07:3C:8E:A2:26:C6:92:67:3E:97:07:FA:88:D1:C2:34"
+            ]
+        }
+    }
+]
