@@ -4,9 +4,11 @@ import './style.css'
 import { io } from 'socket.io-client'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { register } from './serviceWorkerRegistration'
 
-register()
+// ✅ NOVO: service worker do Vite PWA
+import { registerSW } from 'virtual:pwa-register'
+
+registerSW()
 
 const BACKEND_URL = 'https://api-papo-reto.onrender.com'
 const VAPID_PUBLIC_KEY =
@@ -97,7 +99,6 @@ function Home() {
       minute: '2-digit'
     })
   }
-
 
   // ======================
   // 🚀 INICIAR CHAT
